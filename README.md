@@ -55,3 +55,7 @@ mkdir build
 cd build
 cmake ..
 ```
+
+g++ -o ascii2binary ascii2binary.cpp 
+ascii2binary aij_2592000.mtx aij_2592000.bin
+./muelu_input_deck --xml=../src/muelu/params-files/set3-mg-chebyshev.xml  --matrix=../../matrix-market-TRUST/aij_2592000.bin --binary=0 --timings --stacked-timer --rhs=../../matrix-market-TRUST/rhs_2592000.mtx 

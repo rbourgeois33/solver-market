@@ -23,10 +23,13 @@ include_directories(${Trilinos_TPL_INCLUDE_DIRS})
 link_directories(${Trilinos_LIBRARY_DIRS})
 link_directories(${Trilinos_TPL_LIBRARY_DIRS})
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
+
 # Your executable
 include_directories(${CMAKE_SOURCE_DIR}/external/trilinos/packages/muelu/test/scaling)
 include_directories(${CMAKE_SOURCE_DIR}/external/trilinos/packages/muelu/test/unit_tests)
-add_executable(muelu_input_deck input-decks/muelu-input-deck.cpp)
+add_executable(muelu_input_deck src/muelu/muelu-input-deck.cpp)
 
 # Link against Trilinos and its TPLs
 target_link_libraries(muelu_input_deck

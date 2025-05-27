@@ -46,6 +46,10 @@ The source code is not MueLu specific and can be used with any Stratimikos strat
 // Galeri includes
 #include <Galeri_XpetraParameters.hpp>
 
+#include <chrono>
+
+#include <SolverMarketOutput.h>
+
 template <typename Scalar, class LocalOrdinal, class GlobalOrdinal, class Node>
 int main_(Teuchos::CommandLineProcessor &clp, Xpetra::UnderlyingLib lib, int argc, char *argv[]) {
 #include <MueLu_UseShortNames.hpp>
@@ -60,6 +64,10 @@ int main_(Teuchos::CommandLineProcessor &clp, Xpetra::UnderlyingLib lib, int arg
   bool success = false;
   bool verbose = true;
   try {
+    // SolverMarket timers
+    std::chrono::milliseconds SolverMarketSetupTime, SolverMarketSolveTime;
+    //
+
     //
     // MPI initialization
     //
@@ -191,18 +199,27 @@ int main_(Teuchos::CommandLineProcessor &clp, Xpetra::UnderlyingLib lib, int arg
     RCP<Thyra::PreconditionerBase<Scalar> > prec;
     Teuchos::RCP<Thyra::LinearOpWithSolveBase<Scalar> > thyraInverseA;
     if (!precFactory.is_null()) {
-      prec = precFactory->createPrec();
 
+      //SolverMarket: time setup
+      auto start = std::chrono::high_resolution_clock::now();
+
+      prec = precFactory->createPrec();
       // Build a Thyra operator corresponding to A^{-1} computed using the Stratimikos solver.
       Thyra::initializePrec<Scalar>(*precFactory, thyraA, prec.ptr());
       thyraInverseA = solverFactory->createOp();
       Thyra::initializePreconditionedOp<Scalar>(*solverFactory, thyraA, prec, thyraInverseA.ptr());
+      auto end = std::chrono::high_resolution_clock::now();
+      SolverMarketSetupTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     } else {
       thyraInverseA = Thyra::linearOpWithSolve(*solverFactory, thyraA);
     }
 
+    //SolverMarket time solve
+    auto start = std::chrono::high_resolution_clock::now();
     // Solve Ax = b.
     Thyra::SolveStatus<Scalar> status = Thyra::solve<Scalar>(*thyraInverseA, Thyra::NOTRANS, *thyraB, thyraX.ptr());
+    auto end = std::chrono::high_resolution_clock::now();
+    SolverMarketSolveTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
     success = (status.solveStatus == Thyra::SOLVE_STATUS_CONVERGED);
 
@@ -248,6 +265,8 @@ int main_(Teuchos::CommandLineProcessor &clp, Xpetra::UnderlyingLib lib, int arg
 
     TimeMonitor::clearCounters();
     out << std::endl;
+
+    SolverMarketOutput(SolverMarketSetupTime, SolverMarketSolveTime);
   }
   TEUCHOS_STANDARD_CATCH_STATEMENTS(verbose, std::cerr, success);
 
