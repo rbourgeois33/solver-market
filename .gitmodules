@@ -1,0 +1,3 @@
+[submodule "external/trilinos"]
+	path = external/trilinos
+	url = https://github.com/trilinos/Trilinos.git
