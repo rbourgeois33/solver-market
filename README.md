@@ -4,6 +4,7 @@
 
 ```bash
 module load cuda/12.4.0
+export OMPI_CXX=/volatile/catA/rb263871/Trilinos/packages/kokkos/bin/nvcc_wrapper 
 ```
 ---
 
@@ -35,8 +36,8 @@ cmake \
   -D TPL_ENABLE_BLAS:BOOL=ON \
   -D TPL_ENABLE_MPI:BOOL=ON \
   -D Kokkos_ENABLE_CUDA=ON \
-  -D Kokkos_ENABLE_DEBUG=ON \
-  -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=ON \
+  -D Kokkos_ENABLE_DEBUG=OFF \
+  -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=OFF \
   -D TPL_ENABLE_CUSOLVER=ON \
   -D TPL_ENABLE_CUBLAS=ON \
   ..
@@ -57,5 +58,9 @@ cmake ..
 ```
 
 g++ -o ascii2binary ascii2binary.cpp 
+
 ascii2binary aij_2592000.mtx aij_2592000.bin
+
 ./muelu_input_deck --xml=../src/muelu/params-files/set3-mg-chebyshev.xml  --matrix=../../matrix-market-TRUST/aij_2592000.bin --binary=0 --timings --stacked-timer --rhs=../../matrix-market-TRUST/rhs_2592000.mtx 
+
+for f in ../src/muelu/params-files/*.xml; do ./muelu_input_deck --xml="$f" --matrix=../../matrix-market-TRUST/aij_2592000.bin --binary=0 --timings --stacked-timer --rhs=../../matrix-market-TRUST/rhs_2592000.mtx; done

@@ -266,7 +266,7 @@ int main_(Teuchos::CommandLineProcessor &clp, Xpetra::UnderlyingLib lib, int arg
     TimeMonitor::clearCounters();
     out << std::endl;
 
-    SolverMarketOutput(SolverMarketSetupTime, SolverMarketSolveTime);
+    SolverMarketOutput(SolverMarketSetupTime, SolverMarketSolveTime, success, argc, argv);
   }
   TEUCHOS_STANDARD_CATCH_STATEMENTS(verbose, std::cerr, success);
 
