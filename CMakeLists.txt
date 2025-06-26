@@ -33,3 +33,52 @@ target_link_libraries(muelu_input_deck
     ${Trilinos_LIBRARIES}
     ${Trilinos_TPL_LIBRARIES}
 )
+
+
+# Point CMake to AMGX headers
+include_directories("${CMAKE_SOURCE_DIR}/external/AMGX/include")
+
+# # Point CMake to AMGX libraries
+link_directories("${CMAKE_SOURCE_DIR}/external/AMGX/build")
+
+# # Create the executable from your source file
+add_executable(amgx_input_deck src/amgx/amgx-input-deck.cpp)
+
+# # Link against the AMGX shared library (AMGXsh).
+target_link_libraries(amgx_input_deck amgxsh)
+
+
+
+include(FetchContent)
+
+# Download GTest if not already available
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+# Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+# Download and make GTest targets
+FetchContent_MakeAvailable(googletest)
+
+
+add_executable(unit-test-solver-market-csr-matrix src/unit-test-solver-market-csr-matrix.cpp)
+
+# Include dirs (Trilinos includes Kokkos)
+target_include_directories(unit-test-solver-market-csr-matrix PRIVATE
+    ${Trilinos_INCLUDE_DIRS}
+    ${Trilinos_TPL_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+# Link Trilinos, MPI, and GTest
+target_link_libraries(unit-test-solver-market-csr-matrix
+    PRIVATE
+    MPI::MPI_CXX
+    ${Trilinos_LIBRARIES}
+    ${Trilinos_TPL_LIBRARIES}
+    GTest::gtest
+    GTest::gtest_main
+)

@@ -60,11 +60,22 @@ cmake \
 make -j 40 && make install
 ```
 
+## 3. Configure and Build AMGX
+
+```bash
+mkdir build && cd build
+
+cmake ..
+
+make -j 40
+```
+
+
 ---
 
-## 4. Configure Your Solver Project
+## 4. Configure solver-market
 
-From the root of your SolverMarket project:
+From the root of the repo
 
 ```bash
 mkdir build
