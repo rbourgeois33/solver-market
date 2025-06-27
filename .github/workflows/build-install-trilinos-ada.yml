@@ -1,0 +1,76 @@
+name: build-install-trilinos-ada
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'external/trilinos/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'external/trilinos/**'
+  workflow_dispatch:  # allows manual triggering
+
+jobs:
+  test-muelu-input-deck-ada:
+    runs-on: [self-hosted, ada]
+
+    steps:
+    - name: clone and checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: load modules
+      run: |
+        module purge
+        module load cuda/12.8.0
+        export WRAPPER_PATH="${{ github.workspace }}/external/trilinos/packages/kokkos/bin/nvcc_wrapper"
+        export OMPI_CXX=$WRAPPER_PATH
+        export CXX=$WRAPPER_PATH
+        echo "OMPI_CXX=$OMPI_CXX"
+        echo "CXX=$CXX"
+    
+    - name: configure trilinos 
+      working-directory: external/trilinos
+      run: |
+        mkdir build && cd build 
+        cmake \
+        -D CMAKE_INSTALL_PREFIX=../install \
+        -D CMAKE_BUILD_TYPE=RELEASE \
+        -D BUILD_SHARED_LIBS:BOOL=ON \
+        -D Trilinos_ENABLE_EXPLICIT_INSTANTIATION:BOOL=ON \
+        -D Trilinos_ENABLE_TESTS:BOOL=OFF \
+        -D Trilinos_ENABLE_EXAMPLES:BOOL=OFF \
+        -D Trilinos_ENABLE_MueLu:BOOL=ON \
+        -D Kokkos_ENABLE_DEBUG=OFF \
+        -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=OFF \
+        -D Kokkos_ARCH_ADA89=ON \
+        -D TPL_ENABLE_BLAS:BOOL=ON \
+        -D TPL_ENABLE_MPI:BOOL=ON \
+        -D TPL_ENABLE_CUSOLVER=ON \
+        -D TPL_ENABLE_CUBLAS=ON \
+        -D TPL_ENABLE_CUDA=ON \
+        -D TPL_ENABLE_CUSPARSE=ON \
+        -D MueLu_ENABLE_TESTS:BOOL=ON \
+        -D MueLu_ENABLE_EXAMPLES:BOOL=ON \
+        -D MueLu_ENABLE_CUSPARSE=ON \
+        ..
+          
+    - name: build trilinos 
+      working-directory: external/trilinos/build
+      run: |
+        nice -n 19 make -j48
+        make install
+    
+    - name: cache trilinos install
+      uses: actions/cache@v3
+      with:
+        path: external/trilinos/install
+        key: trilinos-install-ada
+
+    - name: cache trilinos build
+      uses: actions/cache@v3
+      with:
+        path: external/trilinos/build
+        key: trilinos-build-ada
