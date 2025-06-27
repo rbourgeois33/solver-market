@@ -10,7 +10,7 @@
 using Device = Kokkos::DefaultExecutionSpace;
 using Host = Kokkos::DefaultHostExecutionSpace;
 
-#ifndef GTEST_
+#ifndef GTEST_ //This is skipped for unit tests as it runs on a simple runner
 static_assert(!std::is_same<Device, Host>::value, "Error: Device and Host execution spaces must be different. You build Kokkos from trilinos without GPU option !");
 #endif
 
