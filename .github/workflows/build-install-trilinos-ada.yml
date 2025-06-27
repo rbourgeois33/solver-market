@@ -34,7 +34,6 @@ jobs:
     - name: configure trilinos 
       working-directory: external/trilinos
       run: |
-        mkdir build
         cd build 
         ls
         cmake \
