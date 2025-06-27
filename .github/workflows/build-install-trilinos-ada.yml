@@ -21,7 +21,7 @@ jobs:
 
     - name: Initialize and update MueLu submodule
       run: |
-        git submodule update --init external/trilinos/packages/muelu
+        git submodule update --init external/trilinos
 
     - name: load modules
       run: |
