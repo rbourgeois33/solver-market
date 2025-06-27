@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  test-muelu-input-deck:
     runs-on: [self-hosted]
 
     steps:
@@ -17,8 +17,8 @@ jobs:
         submodules: recursive
 
     - name: load modules
-      run: module load cuda/12.8.0
       run: |
+        module load cuda/12.8.0
         export WRAPPER_PATH="${{ github.workspace }}/external/trilinos/packages/kokkos/bin/nvcc_wrapper"
         export OMPI_CXX=$WRAPPER_PATH
         export CXX=$WRAPPER_PATH
@@ -60,7 +60,7 @@ jobs:
     - name: configure 
       run: |
         mkdir build-muelu;
-        cmake .. -DBUILD_MUELU_INPUT_DECK=ON -DBUILD_AMGX_INPUT_DECK=OFF -DBUILD_UNIT_TESTS=OF
+        cmake .. -DBUILD_MUELU_INPUT_DECK=ON -DBUILD_AMGX_INPUT_DECK=OFF -DBUILD_UNIT_TESTS=OFF
 
     - name: build
       working-directory: build-muelu
