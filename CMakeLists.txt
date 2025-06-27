@@ -114,20 +114,17 @@ if(BUILD_UNIT_TESTS)
 
     # Common includes
     target_include_directories(unit-test-solver-market-csr-matrix PRIVATE
-        ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/src/solver-market
     )
 
     # Link either Trilinos or fallback Kokkos
     if(HAVE_TRILINOS)
         target_include_directories(unit-test-solver-market-csr-matrix PRIVATE
             ${Trilinos_INCLUDE_DIRS}
-            ${Trilinos_TPL_INCLUDE_DIRS}
         )
         target_link_libraries(unit-test-solver-market-csr-matrix
             PRIVATE
-            MPI::MPI_CXX
             ${Trilinos_LIBRARIES}
-            ${Trilinos_TPL_LIBRARIES}
         )
     else()
         target_link_libraries(unit-test-solver-market-csr-matrix PRIVATE kokkos)
