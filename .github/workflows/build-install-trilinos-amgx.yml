@@ -19,7 +19,7 @@ jobs:
     - name: clone and checkout
       uses: actions/checkout@v3
 
-    - name: Initialize and update MueLu submodule
+    - name: Initialize and update AMGX submodule
       run: |
         git submodule update --init external/AMGX
 
@@ -34,7 +34,7 @@ jobs:
         mkdir build
         cd build 
         mkdir build && cd build
-        cmake ..
+        cmake -DCUDA_ARCH="89" ..
           
     - name: build AMGX 
       working-directory: external/AMGX/build
