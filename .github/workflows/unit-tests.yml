@@ -1,0 +1,31 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: prepare
+      uses: actions/checkout@v3
+
+    - name: create build
+      run: mkdir build
+
+    - name: Configure 
+      working-directory: ./build
+      run: |
+        cmake .. -DBUILD_MUELU_INPUT_DECK=OFF -DBUILD_AMGX_INPUT_DECK=OFF -DBUILD_UNIT_TESTS=ON
+
+    - name: build
+      working-directory: ./build
+      run: make -j2
+
+    - name: test
+      working-directory: ./build/tests
+      run: ./unit-test-solver-market-csr-matrix
