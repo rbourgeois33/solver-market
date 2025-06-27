@@ -1,6 +1,8 @@
 [submodule "external/trilinos"]
 	path = external/trilinos
 	url = https://github.com/trilinos/Trilinos.git
+	branch = master
 [submodule "external/AMGX"]
 	path = external/AMGX
 	url = https://github.com/NVIDIA/AMGX.git
+	branch = master
