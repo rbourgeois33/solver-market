@@ -59,6 +59,7 @@ if(BUILD_MUELU_INPUT_DECK AND HAVE_TRILINOS)
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/external/trilinos/packages/muelu/test/scaling
         ${CMAKE_SOURCE_DIR}/external/trilinos/packages/muelu/test/unit_tests
+        ${CMAKE_SOURCE_DIR}/src/solver-market
     )
 
     # Link Trilinos and MPI
@@ -68,6 +69,12 @@ if(BUILD_MUELU_INPUT_DECK AND HAVE_TRILINOS)
         MPI::MPI_CXX
         ${Trilinos_LIBRARIES}
         ${Trilinos_TPL_LIBRARIES}
+    )
+
+    # utils for muelu
+    add_executable(ascii2binary ${CMAKE_SOURCE_DIR}/external/trilinos/packages/muelu/utils/matrix/ascii2binary.cpp)
+    set_target_properties(ascii2binary PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/utils/
     )
 endif()
 

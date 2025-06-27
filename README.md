@@ -26,7 +26,7 @@ export CXX=/home/catA/rb263871/solver-market/external/trilinos/packages/kokkos/b
 cd external/trilinos
 
 # Cherry-pick a specific commit for compatibility or fixes
-git cherry-pick 89f396b83c7b5a90556204a0878f340f7c491545
+# git cherry-pick 89f396b83c7b5a90556204a0878f340f7c491545
 ```
 ---
 
@@ -70,7 +70,6 @@ cmake ..
 make -j 40
 ```
 
-
 ---
 
 ## 4. Configure solver-market
@@ -82,6 +81,7 @@ mkdir build
 cd build
 cmake ..
 ```
+
 
 g++ -o ascii2binary ascii2binary.cpp 
 

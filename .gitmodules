@@ -5,4 +5,4 @@
 [submodule "external/AMGX"]
 	path = external/AMGX
 	url = https://github.com/NVIDIA/AMGX.git
-	branch = master
+	branch = main
