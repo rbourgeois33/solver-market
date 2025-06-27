@@ -36,17 +36,17 @@ public:
 
   SolverMarketCSRMatrix() = default;
 
-  SolverMarketCSRMatrix(const size_t n, const size_t nnz){
-    allocate(n, nnz);
-  }
+  // SolverMarketCSRMatrix(const size_t n, const size_t nnz){
+  //   allocate(n, nnz);
+  // }
 
-  SolverMarketCSRMatrix(std::string filename){
-    read_matrix_market_file(filename);
+  SolverMarketCSRMatrix(std::string filename, SolverMarketCSRMatrixView mview, SolverMarketCSRMatrixType mtype= SolverMarketCSRMatrixTypeNone){
+    read_matrix_market_file(filename, mview, mtype);
   }
   
-  int allocate(const size_t n, const size_t nnz);
+  int read_matrix_market_file(std::string filename, SolverMarketCSRMatrixView mview, SolverMarketCSRMatrixType mtype= SolverMarketCSRMatrixTypeNone);
+
   int send_to_device();
-  int read_matrix_market_file(std::string filename);
 
   size_t* get_host_offsets_pointer(){return offsets_h_.data();}
   size_t* get_host_columns_pointer(){return columns_h_.data();}
@@ -59,7 +59,7 @@ public:
   size_t get_n(){return n_;};
   size_t get_nnz(){return nnz_;};
 
-#ifdef GTEST_
+#ifdef GTEST_ /* only avail for testing. We shouldnt see kokkos outside of the class*/
 // Host Views
 HostView<size_t> get_host_offsets()        { return offsets_h_; }
 HostView<size_t> get_host_columns()        { return columns_h_; }
@@ -71,6 +71,18 @@ DeviceView<size_t> get_device_columns()    { return columns_d_; }
 DeviceView<_TYPE_> get_device_values()     { return values_d_;  }
 #endif
 
+// --- Query Functions for View ---
+void setView(SolverMarketCSRMatrixView view) { mview_ = view; }
+void setType(SolverMarketCSRMatrixType type) { mtype_ = type; }
+SolverMarketCSRMatrixView getView() const { return mview_; }
+SolverMarketCSRMatrixType getType() const { return mtype_; }
+bool isFull() const { return mview_ == SolverMarketCSRMatrixFull; }
+bool isLower() const { return mview_ == SolverMarketCSRMatrixLower; }
+bool isUpper() const { return mview_ == SolverMarketCSRMatrixUpper; }
+bool isGeneral() const { return mtype_ == SolverMarketCSRMatrixGeneral; }
+bool isSymmetric() const { return mtype_ == SolverMarketCSRMatrixSymmetric; }
+bool hasValidView() const { return mview_ != SolverMarketCSRMatrixViewNone; }
+bool hasValidType() const { return mtype_ != SolverMarketCSRMatrixTypeNone; }
 
 private:
 
@@ -86,5 +98,8 @@ private:
 
   SolverMarketCSRMatrixView mview_=SolverMarketCSRMatrixViewNone;
   SolverMarketCSRMatrixType mtype_=SolverMarketCSRMatrixTypeNone;
+
+  int allocate(const size_t n, const size_t nnz);
+
 };
 #include "solver-market-csr-matrix.tpp"

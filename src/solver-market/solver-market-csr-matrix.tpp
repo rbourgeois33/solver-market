@@ -42,12 +42,14 @@ enum MtxReaderStatus {
     MtxReaderErrorUpperViewButLowerFound,
     MtxReaderErrorLowerViewButUpperFound,
     MtxReaderErrorOutOfBoundRowIndex,
-    MtxReaderErrorOfBoundColIndex
-
+    MtxReaderErrorOfBoundColIndex,
+    MtxReaderUnsupportedObject,
+    MtxReaderUnsupportedMatrixType,
+    MtxReaderTypeReadIsNotTypeGiven
 };
 
 template<typename _TYPE_>
-int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename)
+int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename, SolverMarketCSRMatrixView mview, SolverMarketCSRMatrixType mtype)
 {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -57,19 +59,57 @@ int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename)
 
     std::string line;
     bool foundSize = false;
+    bool foundHeader = false;
+    bool found_lower = false, found_upper = false;
     int declared_nnz = 0;
     int file_line_count = 0;
     int n, nnz;
+    SolverMarketCSRMatrixType read_type = SolverMarketCSRMatrixTypeNone;
 
     //Tuple for the mtw lines
     std::vector<std::tuple<int, int, _TYPE_>> entries;
 
-    bool found_lower = false, found_upper = false;
 
     while (std::getline(file, line)) {
         //Skip header
-        if (line.empty() || line[0] == '%') continue;
+        if (line.empty()) continue;
 
+        // Parse MatrixMarket header
+        if (!foundHeader) {
+            if (line.rfind("%%MatrixMarket", 0) == 0) {
+                std::istringstream header(line);
+                std::string banner, object, format, field, symmetry;
+                header >> banner >> object >> format >> field >> symmetry;
+
+                if (object != "matrix" || format != "coordinate") {
+                    std::cerr << "[Error][SolverMarket][CsrMatrix][read_from_file] Only 'matrix coordinate' format is supported.\n";
+                    return MtxReaderUnsupportedObject;
+                }
+
+                if (symmetry == "general") read_type = SolverMarketCSRMatrixGeneral;
+                else if (symmetry == "symmetric") read_type = SolverMarketCSRMatrixSymmetric;
+                else {
+                    std::cerr << "[Error][SolverMarket][CsrMatrix][read_from_file]  Unsupported matrix type: " << symmetry << "\n";
+                    return MtxReaderUnsupportedMatrixType;
+                }
+
+
+                if (mtype == SolverMarketCSRMatrixTypeNone){
+                    mtype_ = read_type;
+                    std::cout << "[Info][SolverMarket][CsrMatrix][read_from_file] Matrix type read in mtx header: "<<read_type<<".\n";
+                }else{
+                    if (mtype_ == read_type)
+                        std::cout << "[Info][SolverMarket][CsrMatrix][read_from_file] Matrix type read in mtx header: "<<read_type<<".\n";
+                    else
+                        std::cerr << "[Error][SolverMarket][CsrMatrix][read_from_file] Matrix type read in mtx header: "<<read_type<<" but mtx reader was called with type"<<mtype<<".\n";
+                        return MtxReaderTypeReadIsNotTypeGiven;
+                }
+
+                foundHeader = true;
+
+            }
+            continue; // Skip other comment lines before header
+        }
         //Get metadata
         std::istringstream lineData(line);
         if (!foundSize) {
@@ -93,8 +133,16 @@ int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename)
         }
     }
 
+    if (not(foundHeader)){
+        std::cerr << "[Error][SolverMarket][CsrMatrix][read_from_file] No header found in mtx file.\n";
+        return 1;
+    }
+
     file.close();
     nnz = entries.size();
+
+    /* set view type */
+    mview_ = mview;
 
     // Allocate memory
     int failed = allocate(n, nnz);
@@ -166,7 +214,7 @@ int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename)
     // // Detect empty rows
     for (int i = 0; i < n; ++i) {
         if (offsets_h_(i) == offsets_h_(i+1)) {
-            std::cout << "[Warning][SolverMarket][CsrMatrix][read_from_file] Row " << i << " is empty";
+            std::cout << "[Warning][SolverMarket][CsrMatrix][read_from_file] Row " << i << " is empty\n";
         }
     }
 

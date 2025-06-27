@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
   }
 }
 
-TEST(MatrixReaderTest, BasicUnsortedMatrix) {
+TEST(SolverMarketCsrMatrixReader, BasicUnsortedMatrix) {
     std::string content =
         "%%MatrixMarket matrix coordinate real general\n"
         "5 5 4\n"
@@ -34,10 +34,10 @@ TEST(MatrixReaderTest, BasicUnsortedMatrix) {
         "1 1 1.0\n"
         "2 5 2.5\n"
         "5 5 5.5\n";
-    write_temp_file("test1.mtx", content);
 
     std::string filename = "test1.mtx";
-    auto matrix =  SolverMarketCSRMatrix<float>(filename);
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>(filename, SolverMarketCSRMatrixFull);
 
     auto n = matrix.get_n();
     auto nnz = matrix.get_nnz();
@@ -66,24 +66,70 @@ TEST(MatrixReaderTest, BasicUnsortedMatrix) {
     EXPECT_FLOAT_EQ(cols(3), 4);
 }
 
-/* TEST(MatrixReaderTest, InvalidUpperWithLowerEntry) {
+
+TEST(SolverMarketCsrMatrixReader, MtxReaderUnsupportedObject) {
+    std::string content =
+        "%%MatrixMarket tensor yolo real general\n"
+        "3 3 2\n"
+        "1 2 1.0\n"
+        "3 1 2.0\n";  // lower triangle
+
+    std::string filename = "test3.mtx";
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull);
+
+
+    ASSERT_EQ(result, MtxReaderUnsupportedObject); // Should fail
+}
+
+TEST(SolverMarketCsrMatrixReader, MtxReaderUnsupportedMatrixType) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real hermitian\n"
+        "3 3 2\n"
+        "1 2 1.0\n"
+        "3 1 2.0\n";  // lower triangle
+
+    std::string filename = "test3.mtx";
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull);
+
+
+    ASSERT_EQ(result, MtxReaderUnsupportedMatrixType); // Should fail
+}
+
+
+TEST(SolverMarketCsrMatrixReader, MtxReaderTypeReadIsNotTypeGiven) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real symmetric\n"
+        "3 3 2\n"
+        "1 2 1.0\n"
+        "3 1 2.0\n";  // lower triangle
+
+    std::string filename = "test3.mtx";
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull, SolverMarketCSRMatrixGeneral);
+
+
+    ASSERT_EQ(result, MtxReaderTypeReadIsNotTypeGiven); // Should fail
+}
+
+
+TEST(SolverMarketCsrMatrixReader, InvalidUpperWithLowerEntry) {
     std::string content =
         "%%MatrixMarket matrix coordinate real general\n"
         "3 3 2\n"
         "1 2 1.0\n"
         "3 1 2.0\n";  // lower triangle
 
-    write_temp_file("test2.mtx", content);
-
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("test2.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_UPPER, false, false);
+    std::string filename = "test2.mtx";
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixUpper);
 
     ASSERT_EQ(result, MtxReaderErrorUpperViewButLowerFound); // Should fail
-
-    free(offsets);
-    free(cols);
-    free(values);
 }
 
 TEST(MatrixReaderTest, InvalidLowerWithUpperEntry) {
@@ -95,15 +141,13 @@ TEST(MatrixReaderTest, InvalidLowerWithUpperEntry) {
 
     write_temp_file("test3.mtx", content);
 
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("test3.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_LOWER, false, false);
+    std::string filename = "test2.mtx";
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixLower);
 
     ASSERT_EQ(result, MtxReaderErrorLowerViewButUpperFound); // Should fail
-    
-    free(offsets);
-    free(cols);
-    free(values);
+
 }
 
 
@@ -114,13 +158,16 @@ TEST(MatrixReaderTest, EmptyRowsPresent) {
         "1 1 1.0\n"
         "4 4 4.0\n";
 
-    write_temp_file("test5.mtx", content);
+        std::string filename = "test1.mtx";
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>(filename, SolverMarketCSRMatrixFull);
 
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("test5.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_FULL, false, false);
+    auto n = matrix.get_n();
+    auto nnz = matrix.get_nnz();
+    auto offsets = matrix.get_host_offsets();
+    auto cols = matrix.get_host_columns();
+    auto values = matrix.get_host_values();
 
-    ASSERT_EQ(result, 0);
     ASSERT_EQ(n, 4);
     ASSERT_EQ(nnz, 2);
 
@@ -135,23 +182,16 @@ TEST(MatrixReaderTest, EmptyRowsPresent) {
 
     ASSERT_EQ(cols(0), 0);
     ASSERT_EQ(cols(1), 3);
-
-
-    free(offsets);
-    free(cols);
-    free(values);
 }
 
+
 TEST(MatrixReaderTest, FileNotFound) {
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("nonexistent_file.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_FULL, false, false);
+
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    std::string filename = "idontexist.mtx";
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixUpper);
 
     ASSERT_EQ(result,  MtxReaderErrorFileNotFound); // Should fail
-
-    free(offsets);
-    free(cols);
-    free(values);
 }
 
 TEST(MatrixReaderTest, SortedOutputCSR) {
@@ -164,13 +204,18 @@ TEST(MatrixReaderTest, SortedOutputCSR) {
         "2 3 2.0\n"
         "2 2 1.5\n";  // deliberately out-of-order input
 
-    write_temp_file("test_sorted.mtx", content);
+    std::string filename = "test1.mtx";
 
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("test_sorted.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_FULL, false, false);
+    write_temp_file(filename, content);
 
-    ASSERT_EQ(result, 0);
+    auto matrix =  SolverMarketCSRMatrix<float>(filename, SolverMarketCSRMatrixFull);
+
+    auto n = matrix.get_n();
+    auto nnz = matrix.get_nnz();
+    auto offsets = matrix.get_host_offsets();
+    auto cols = matrix.get_host_columns();
+    auto values = matrix.get_host_values();
+
     ASSERT_EQ(n, 4);
     ASSERT_EQ(nnz, 5);
 
@@ -191,11 +236,8 @@ TEST(MatrixReaderTest, SortedOutputCSR) {
     ASSERT_DOUBLE_EQ(values(2), 2.0);
     ASSERT_DOUBLE_EQ(values(3), 3.0);
     ASSERT_DOUBLE_EQ(values(4), 4.0);
-
-    free(offsets);
-    free(cols);
-    free(values);
 }
+
 
 TEST(MatrixReaderTest, InvalidRowIndex) {
     std::string content =
@@ -204,17 +246,15 @@ TEST(MatrixReaderTest, InvalidRowIndex) {
         "-12 1 1.0\n"
         "3 2 2.0\n";  // only lower
 
-    write_temp_file("test6.mtx", content);
+    std::string filename = "test1.mtx";
 
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("test6.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_FULL, false, false);
+    write_temp_file(filename, content);
+
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull);
 
     ASSERT_EQ(result, MtxReaderErrorOutOfBoundRowIndex); // Should fail
 
-    free(offsets);
-    free(cols);
-    free(values);
 }
 
 TEST(MatrixReaderTest, InvalidColIndex) {
@@ -225,17 +265,14 @@ TEST(MatrixReaderTest, InvalidColIndex) {
         "3 -2 2.0\n"
         "2 3 2.0\n";  // only lower
 
-    write_temp_file("test7.mtx", content);
+    std::string filename = "test1.mtx";
 
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("test7.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_FULL, false, false);
+    write_temp_file(filename, content);
+
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull);
 
     ASSERT_EQ(result, MtxReaderErrorOfBoundColIndex); // Should fail
-
-    free(offsets);
-    free(cols);
-    free(values);
 }
 
 
@@ -247,17 +284,14 @@ TEST(MatrixReaderTest, WrongNnz) {
         "3 2 2.0\n"   
         "3 3 2.0\n";  // only lower
 
-    write_temp_file("test8.mtx", content);
+    std::string filename = "test1.mtx";
 
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("test8.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_FULL, false, false);
+    write_temp_file(filename, content);
+
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull);
 
     ASSERT_EQ(result, MtxReaderErrorWrongNnz); // Should fail
-
-    free(offsets);
-    free(cols);
-    free(values);
 }
 
 TEST(MatrixReaderTest, UnsortedColumnsWithEmptyRows) {
@@ -272,12 +306,18 @@ TEST(MatrixReaderTest, UnsortedColumnsWithEmptyRows) {
         // Row 4: empty
         "1 3 1.0\n";  // Row 0: one entry at col 2
 
-    write_temp_file("test_unsorted_empty.mtx", content);
+     std::string filename = "test1.mtx";
 
-    int n, nnz, *offsets, *cols;
-    double* values;
-    int result = matrix_reader<double>("test_unsorted_empty.mtx", n, nnz, &offsets, &cols, &values, CUDSS_MVIEW_FULL, false, false);
+    write_temp_file(filename, content);
 
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull);
+    auto n = matrix.get_n();
+    auto nnz = matrix.get_nnz();
+    auto offsets = matrix.get_host_offsets();
+    auto cols = matrix.get_host_columns();
+    auto values = matrix.get_host_values();
+    
     ASSERT_EQ(result, 0);
     ASSERT_EQ(n, 6);
     ASSERT_EQ(nnz, 5);
@@ -303,8 +343,4 @@ TEST(MatrixReaderTest, UnsortedColumnsWithEmptyRows) {
     ASSERT_EQ(cols(2), 0);
     ASSERT_EQ(cols(3), 2);
     ASSERT_EQ(cols(4), 1);
-
-    free(offsets);
-    free(cols);
-    free(values);
-} */
+} 
