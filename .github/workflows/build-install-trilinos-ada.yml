@@ -18,8 +18,10 @@ jobs:
     steps:
     - name: clone and checkout
       uses: actions/checkout@v3
-      with:
-        submodules: recursive
+
+    - name: Initialize and update MueLu submodule
+      run: |
+        git submodule update --init external/trilinos/packages/muelu
 
     - name: load modules
       run: |
@@ -34,8 +36,8 @@ jobs:
     - name: configure trilinos 
       working-directory: external/trilinos
       run: |
+        mkdir build
         cd build 
-        ls
         cmake \
         -D CMAKE_INSTALL_PREFIX=../install \
         -D CMAKE_BUILD_TYPE=RELEASE \
@@ -64,14 +66,14 @@ jobs:
         nice -n 19 make -j48
         make install
     
-    - name: cache trilinos install
-      uses: actions/cache@v3
-      with:
-        path: external/trilinos/install
-        key: trilinos-install-ada
+    # - name: cache trilinos install
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: external/trilinos/install
+    #     key: trilinos-install-ada
 
-    - name: cache trilinos build
-      uses: actions/cache@v3
-      with:
-        path: external/trilinos/build
-        key: trilinos-build-ada
+    # - name: cache trilinos build
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: external/trilinos/build
+    #     key: trilinos-build-ada
