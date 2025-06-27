@@ -12,7 +12,7 @@ on:
   workflow_dispatch:  # allows manual triggering
 
 jobs:
-  test-muelu-input-deck-ada:
+  build-install-trilinos-ada:
     runs-on: [self-hosted, ada]
 
     steps:
@@ -34,7 +34,9 @@ jobs:
     - name: configure trilinos 
       working-directory: external/trilinos
       run: |
-        mkdir build && cd build 
+        mkdir build
+        cd build 
+        ls
         cmake \
         -D CMAKE_INSTALL_PREFIX=../install \
         -D CMAKE_BUILD_TYPE=RELEASE \
