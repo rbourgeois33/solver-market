@@ -31,8 +31,7 @@ jobs:
     - name: configure AMGX 
       working-directory: external/AMGX
       run: |
-        mkdir build
-        cd build 
+        [ -d build ] && rm -rf build
         mkdir build && cd build
         cmake -DCUDA_ARCH="89" ..
           
