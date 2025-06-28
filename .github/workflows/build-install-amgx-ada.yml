@@ -21,7 +21,7 @@ jobs:
 
     - name: Initialize and update AMGX submodule
       run: |
-        git submodule update --init external/AMGX
+        git submodule update --init --recursive external/AMGX
 
     - name: load modules
       run: |
