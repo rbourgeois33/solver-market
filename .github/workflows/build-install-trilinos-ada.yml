@@ -36,6 +36,7 @@ jobs:
     - name: configure trilinos 
       working-directory: external/trilinos
       run: |
+        [ -d build ] && rm -rf build
         mkdir build
         cd build 
         cmake \
@@ -63,6 +64,7 @@ jobs:
     - name: build trilinos 
       working-directory: external/trilinos/build
       run: |
+        [ -d install ] && rm -rf install
         nice -n 19 make -j48
         make install
     
