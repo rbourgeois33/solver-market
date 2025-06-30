@@ -35,9 +35,9 @@ jobs:
 
   configure-trilinos:
     runs-on: [self-hosted, ada]
-    working-directory: external/trilinos/build
     steps:
     - name: configure-trilinos 
+      working-directory: external/trilinos
       run: |
         [ -d build ] && rm -rf build
         mkdir build
@@ -66,9 +66,9 @@ jobs:
           
   build-trilinos:
     runs-on: [self-hosted, ada]
-    working-directory: external/trilinos/build
     steps:
     - name: install-trilinos
+      working-directory: external/trilinos/build
       run: |
         [ -d install ] && rm -rf install
         nice -n 19 make -j48
