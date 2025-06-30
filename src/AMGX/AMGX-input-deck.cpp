@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <AMGX_c.h>
+#include <amgx_c.h>
 #include <cstring>
 
 //AMGX_RC is AMGX Return Code, all AMGX functions output one
