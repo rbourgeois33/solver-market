@@ -5,6 +5,7 @@ int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::send_to_device(){
         std::cout<<"[Error][SolverMarket][CsrMatrix][send_to_device] You want to send to device a CSR matrix that has not been allocated\n";
         return 1;
     }
+
     Kokkos::deep_copy(offsets_d_, offsets_h_);
     Kokkos::deep_copy(columns_d_, columns_h_);
     Kokkos::deep_copy(values_d_, values_h_);
@@ -20,11 +21,11 @@ int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::allocate(const _ITYPE_ n, const _ITY
     nnz_ = nnz;
 
     offsets_h_ = HostView<_ITYPE_>("offsets_h_", n+1);
-    columns_h_ = HostView<_ITYPE_>("columns_h_", n);
+    columns_h_ = HostView<_ITYPE_>("columns_h_", nnz);
     values_h_ = HostView<_TYPE_>("values_h_", nnz);
 
     offsets_d_ = DeviceView<_ITYPE_>("offsets_d_", n+1);
-    columns_d_ = DeviceView<_ITYPE_>("columns_d_", n);
+    columns_d_ = DeviceView<_ITYPE_>("columns_d_", nnz);
     values_d_ = DeviceView<_TYPE_>("values_d_", nnz);
 
     std::cout << "[Info][SolverMarket][CsrMatrix][allocate] Successfuly allocated on host and device\n";
@@ -37,10 +38,13 @@ int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::allocate(const _ITYPE_ n, const _ITY
 template<typename _TYPE_, typename _ITYPE_>
 int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string filename, SolverMarketCSRMatrixView mview, SolverMarketCSRMatrixType mtype)
 {
+
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "[Error][SolverMarket][CsrMatrix][read_from_file] Could not open file" << filename << std::endl;
         return  MtxReaderErrorFileNotFound;
+    }else{
+        std::cout << "[Info][SolverMarket][CsrMatrix][read_from_file] Reading file "<< filename << std::endl;
     }
 
     std::string line;
@@ -165,7 +169,7 @@ int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string 
     }
 
 
-    //Initialize with 0's
+    // Initialize with 0's
     for (_ITYPE_ i=0; i<n+1; i++){
         offsets_h_(i)=0;
     }

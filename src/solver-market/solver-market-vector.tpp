@@ -31,6 +31,8 @@ int SolverMarketVector<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string fil
     if (!file.is_open()) {
         std::cerr << "[Error][SolverMarket][Vector][read_from_file] Could not open file: " << filename << "\n";
         return MtxReaderErrorFileNotFound;
+    }else{
+        std::cout << "[Info][SolverMarket][CsrMatrix][read_from_file] Reading file "<< filename << std::endl;
     }
 
     std::string line;

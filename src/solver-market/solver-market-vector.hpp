@@ -25,7 +25,9 @@ public:
 
   SolverMarketVector(_ITYPE_ n, _TYPE_ value){
     allocate(n);
-
+    for (int i=0; i<n; i++){
+      values_h_(i)=value;
+    }
   }
   
   int read_matrix_market_file(std::string filename);

@@ -66,6 +66,72 @@ TEST(SolverMarketCsrMatrixReader, BasicUnsortedMatrix) {
     EXPECT_FLOAT_EQ(cols(3), 4);
 }
 
+TEST(SolverMarketCsrMatrixReader, DenseMatrixNNZGreaterThanN_CheckAll) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real general\n"
+        "5 5 15\n"
+        "1 1 1.0\n"
+        "1 2 1.1\n"
+        "1 3 1.2\n"
+        "2 1 2.0\n"
+        "2 2 2.1\n"
+        "2 3 2.2\n"
+        "3 3 3.0\n"
+        "3 4 3.1\n"
+        "3 5 3.2\n"
+        "4 1 4.0\n"
+        "4 5 4.1\n"
+        "5 1 5.0\n"
+        "5 2 5.1\n"
+        "5 3 5.2\n"
+        "5 5 5.3\n";
+
+    std::string filename = "test_dense.mtx";
+    write_temp_file(filename, content);
+
+    auto matrix = SolverMarketCSRMatrix<float>(filename, SolverMarketCSRMatrixFull);
+
+    auto n = matrix.get_n();
+    auto nnz = matrix.get_nnz();
+    auto offsets = matrix.get_host_offsets();
+    auto cols = matrix.get_host_columns();
+    auto values = matrix.get_host_values();
+
+    ASSERT_EQ(n, 5);
+    ASSERT_EQ(nnz, 15);
+
+    // Offsets: row starts
+    ASSERT_EQ(offsets(0), 0);   // Row 0 (1-based row 1)
+    ASSERT_EQ(offsets(1), 3);   // Row 1
+    ASSERT_EQ(offsets(2), 6);   // Row 2
+    ASSERT_EQ(offsets(3), 9);   // Row 3
+    ASSERT_EQ(offsets(4), 11);  // Row 4
+    ASSERT_EQ(offsets(5), 15);  // End of Row 4
+
+    // All columns (0-based)
+    std::vector<int> expected_cols = {
+        0, 1, 2,    // Row 0
+        0, 1, 2,    // Row 1
+        2, 3, 4,    // Row 2
+        0, 4,       // Row 3
+        0, 1, 2, 4  // Row 4
+    };
+
+    // All values
+    std::vector<float> expected_vals = {
+        1.0, 1.1, 1.2,
+        2.0, 2.1, 2.2,
+        3.0, 3.1, 3.2,
+        4.0, 4.1,
+        5.0, 5.1, 5.2, 5.3
+    };
+
+    for (int i = 0; i < nnz; ++i) {
+        EXPECT_EQ(cols(i), expected_cols[i]) << "Mismatch at col[" << i << "]";
+        EXPECT_FLOAT_EQ(values(i), expected_vals[i]) << "Mismatch at val[" << i << "]";
+    }
+}
+
 TEST(SolverMarketCsrMatrixReader, MtxReaderWrongHeaderOrNoHeader) {
     std::string content =
         "5 5 4\n"

@@ -1,4 +1,4 @@
-name: build-AMGX-input-deck-ada
+name: build-test-AMGX-input-deck-ada
  
 on:
   push:
@@ -60,4 +60,14 @@ jobs:
       working-directory: ./build-AMGX-input-deck
       run: |
         nice -n 19 make -j48
+  
+  -AMGX-input-deck:
+    runs-on: [self-hosted, ada]
+    needs: build-AMGX-input-deck
+    steps:  
+    - name: test-AMGX-input-deck
+      working-directory: ./build-AMGX-input-deck
+      run: |
+        ./input-decks/AMGX_input_deck  --matrix=../matrices/aij_51840.mtx  --config=../external/AMGX/src/configs/PCG_V.json 
+
     
