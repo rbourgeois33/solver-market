@@ -11,7 +11,7 @@ void check_AMGX_error(AMGX_RC rc, const char *msg)
         char err_string[256];
         AMGX_get_error_string(rc, err_string, sizeof(err_string));
         std::cerr << "Error: " << msg << " - " << err_string << std::endl;
-        exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE); 
     } 
 }
 
