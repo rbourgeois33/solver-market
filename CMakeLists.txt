@@ -10,7 +10,7 @@ set(CMAKE_BUILD_TYPE Release)
 # 🔘 Build Options
 # ===============================
 option(BUILD_MUELU_INPUT_DECK "Build muelu input deck example" ON)
-option(BUILD_AMGX_INPUT_DECK "Build amgx input deck example" ON)
+option(BUILD_AMGX_INPUT_DECK "Build AMGX input deck example" ON)
 option(BUILD_UNIT_TESTS "Build unit tests" ON)
 
 # ===============================
@@ -79,22 +79,22 @@ if(BUILD_MUELU_INPUT_DECK AND HAVE_TRILINOS)
 endif()
 
 # ===============================
-# 🔧 Build amgx_input_deck
+# 🔧 Build AMGX_input_deck
 # ===============================
 if(BUILD_AMGX_INPUT_DECK)
     # Add AMGX headers and libraries
     include_directories("${CMAKE_SOURCE_DIR}/external/AMGX/include")
     link_directories("${CMAKE_SOURCE_DIR}/external/AMGX/build")
 
-    add_executable(amgx_input_deck src/amgx/amgx-input-deck.cpp)
+    add_executable(AMGX_input_deck src/AMGX/AMGX-input-deck.cpp)
 
     # Output binary location
-    set_target_properties(amgx_input_deck PROPERTIES
+    set_target_properties(AMGX_input_deck PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/input-decks/
     )
 
     # Link AMGX shared lib
-    target_link_libraries(amgx_input_deck amgxsh)
+    target_link_libraries(AMGX_input_deck AMGXsh)
 endif()
 
 # ===============================

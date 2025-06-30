@@ -1,0 +1,58 @@
+name: build-AMGX-input-deck-ada
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'external/AMGX/**'
+      - 'src/AMGX'
+      - 'src/solver-market'
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'external/AMGX/**'
+      - 'src/AMGX'
+      - 'src/solver-market'
+
+  workflow_dispatch:  # allows manual triggering
+
+  workflow_run: #ensure that if AMGX changes, the lib is built first
+    workflows: ["build-install-AMGX-ada"]
+    types:
+      - completed
+
+jobs:
+  prepare-AMGX-input-deck:
+    runs-on: [self-hosted, ada]
+
+    steps:
+    - name: clone and checkout
+      uses: actions/checkout@v3
+    - name: load modules
+      run: |
+        module purge
+        module load cuda/12.8.0
+    - name: check triggering context
+        run: |
+          echo "Triggered by ${{ github.event_name }}"
+
+  configure-AMGX-input-deck:
+    runs-on: [self-hosted, ada]
+    needs: prepare-AMGX-input-deck
+    steps:  
+    - name: configure AMGX-input-deck
+      run: |
+        [ -d build-AMGX-input-deck ] && rm -rf build-AMGX-input-deck
+        mkdir build-AMGX-input-deck && cd build-AMGX-input-deck
+        cmake .. -DBUILD_MUELU_INPUT_DECK=OFF -DBUILD_AMGX_INPUT_DECK=ON -DBUILD_UNIT_TESTS=OFF
+        
+  build-AMGX-input-deck:
+    runs-on: [self-hosted, ada]
+    needs: configure-AMGX-input-deck
+    steps:  
+    - name: build-AMGX-input-deck
+      working-directory: ./build-AMGX-input-deck
+      run: |
+        nice -n 19 make -j48
+    

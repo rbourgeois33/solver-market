@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
-#include <amgx_c.h>
+#include <AMGX_c.h>
 #include <cstring>
 
 //AMGX_RC is AMGX Return Code, all AMGX functions output one
 //This function helps decoding it
-void check_amgx_error(AMGX_RC rc, const char *msg) 
+void check_AMGX_error(AMGX_RC rc, const char *msg) 
 {
     if (rc != AMGX_RC_OK) {
         char err_string[256];
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
     // 2. Initialize AMGX
     rc = AMGX_initialize();
-    check_amgx_error(rc, "AMGX_initialize error:");
+    check_AMGX_error(rc, "AMGX_initialize error:");
 
 
     //Capture and print AMGX version:
@@ -72,12 +72,12 @@ int main(int argc, char* argv[])
     AMGX_config_handle config = nullptr;
     const char* config_file = argv[1];
     rc = AMGX_config_create_from_file(&config, config_file);
-    check_amgx_error(rc, "AMGX_config_create error:");
+    check_AMGX_error(rc, "AMGX_config_create error:");
 
     // 4. Create AMGX resources
     AMGX_resources_handle rsrc = NULL;
     AMGX_resources_create_simple(&rsrc, config);
-    check_amgx_error(rc, "AMGX_resources_create_simple:");
+    check_AMGX_error(rc, "AMGX_resources_create_simple:");
 
     //Choose mode
     //d: Double precision
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     // 5. Create solver object
     AMGX_solver_handle solver = NULL;
     rc = AMGX_solver_create(&solver, rsrc, mode, config);
-    check_amgx_error(rc, "AMGX_solver_create:");
+    check_AMGX_error(rc, "AMGX_solver_create:");
 
     // 6. Create matrix and vectors
     AMGX_matrix_handle A = NULL;
@@ -101,16 +101,16 @@ int main(int argc, char* argv[])
 
     // 7. Read system from .mtx file
     rc = AMGX_read_system(A, b, x, system_file.c_str());
-    check_amgx_error(rc, "AMGX_read_system:");
+    check_AMGX_error(rc, "AMGX_read_system:");
 
     // 8. Setup the solver (analysis phase)
     rc = AMGX_solver_setup(solver, A);
-    check_amgx_error(rc, "AMGX_solver_setup:");
+    check_AMGX_error(rc, "AMGX_solver_setup:");
  
     // 9. Solve the system
     rc = AMGX_solver_solve(solver, b, x);
 
-    check_amgx_error(rc, "AMGX_solver_setup:");
+    check_AMGX_error(rc, "AMGX_solver_setup:");
     //No need to print stuff: AMGX handles it (optional in config/json file)
 
     if (argc>=3){

@@ -12,7 +12,7 @@ on:
   workflow_dispatch:  # allows manual triggering
 
 jobs:
-  prepare-amgx:
+  prepare-AMGX:
     runs-on: [self-hosted, ada]
     steps:
     - name: clone and checkout
@@ -25,9 +25,9 @@ jobs:
         module purge
         module load cuda/12.8.0
 
-  configure-amgx:
+  configure-AMGX:
     runs-on: [self-hosted, ada]
-    needs: prepare-amgx
+    needs: prepare-AMGX
     steps:  
     - name: configure AMGX 
       working-directory: external/AMGX
@@ -36,9 +36,9 @@ jobs:
         mkdir build && cd build
         cmake -DCUDA_ARCH="80" ..
     
-  build-amgx:
+  build-AMGX:
     runs-on: [self-hosted, ada]
-    needs: configure-amgx
+    needs: configure-AMGX
     steps:  
     - name: build AMGX 
       working-directory: external/AMGX/build

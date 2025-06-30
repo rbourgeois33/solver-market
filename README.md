@@ -64,7 +64,6 @@ make -j 40 && make install
 
 ```bash
 mkdir build && cd build
-
 cmake ..
 
 make -j 40
