@@ -73,7 +73,7 @@ jobs:
           
   build-install-trilinos:
     runs-on: [self-hosted, ada]
-    needs: build-trilinos
+    needs: configure-trilinos
     steps:
     - name: install-trilinos
       working-directory: external/trilinos/build
