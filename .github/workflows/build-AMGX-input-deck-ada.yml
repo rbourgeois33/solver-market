@@ -1,5 +1,5 @@
 name: build-AMGX-input-deck-ada
-
+ 
 on:
   push:
     branches: [ main ]

@@ -1,5 +1,5 @@
 name: build-install-trilinos-ada
-
+  
 on:
   push:
     branches: [ main ]
