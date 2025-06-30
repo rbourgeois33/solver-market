@@ -26,16 +26,19 @@ jobs:
       run: |
         module purge
         module load cuda/12.8.0
+    - name: reset build and install 
+      working-directory: external/trilinos
+      run: |
+        [ -d build ] && rm -rf build
+        mkdir build
 
   configure-AMGX:
     runs-on: [self-hosted, ada]
     needs: prepare-AMGX
     steps:  
     - name: configure AMGX 
-      working-directory: external/AMGX
+      working-directory: external/AMGX/build
       run: |
-        [ -d build ] && rm -rf build
-        mkdir build && cd build
         cmake -DCUDA_ARCH="80" ..
     
   build-AMGX:

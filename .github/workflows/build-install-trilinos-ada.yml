@@ -32,16 +32,23 @@ jobs:
         export CXX=$WRAPPER_PATH
         echo "OMPI_CXX=$OMPI_CXX"
         echo "CXX=$CXX"
-
-  configure-trilinos:
-    runs-on: [self-hosted, ada]
-    steps:
-    - name: configure-trilinos 
+    - name: reset build and install 
       working-directory: external/trilinos
       run: |
         [ -d build ] && rm -rf build
         mkdir build
-        cd build 
+        [ -d install ] && rm -rf install
+        mkdir install
+
+
+
+  configure-trilinos:
+    runs-on: [self-hosted, ada]
+    needs: prepare-trilinos
+    steps:
+    - name: configure-trilinos 
+      working-directory: external/trilinos/build
+      run: |
         cmake \
         -D CMAKE_INSTALL_PREFIX=../install \
         -D CMAKE_BUILD_TYPE=RELEASE \
@@ -64,13 +71,13 @@ jobs:
         -D MueLu_ENABLE_CUSPARSE=ON \
         ..
           
-  build-trilinos:
+  build-install-trilinos:
     runs-on: [self-hosted, ada]
+    needs: build-trilinos
     steps:
     - name: install-trilinos
       working-directory: external/trilinos/build
       run: |
-        [ -d install ] && rm -rf install
         nice -n 19 make -j48
         make install
     
