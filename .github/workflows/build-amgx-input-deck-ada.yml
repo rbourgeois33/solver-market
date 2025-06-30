@@ -1,4 +1,4 @@
-name: build-install-AMGX-ada
+name: build-amgx-input-deck-ada
 
 on:
   push:
