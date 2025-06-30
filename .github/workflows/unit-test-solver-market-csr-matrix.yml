@@ -6,14 +6,14 @@ on:
     paths:
      - 'src/solver-market/**'
      - 'CMakeLists.txt'
-     - 'github/workflows/unit-test-solver-market-csr-matrix.yml'
+     - '.github/workflows/unit-test-solver-market-csr-matrix.yml'
 
   pull_request:
     branches: [ main ]
     paths:
       - 'src/solver-market/**'
       - 'CMakeLists.txt'
-      - 'github/workflows/unit-test-solver-market-csr-matrix.yml'
+      - '.github/workflows/unit-test-solver-market-csr-matrix.yml'
 jobs:
   unit-test-solver-market-csr-matrix:
     runs-on: ubuntu-latest
