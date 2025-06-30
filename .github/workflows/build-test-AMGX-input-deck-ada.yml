@@ -61,7 +61,7 @@ jobs:
       run: |
         nice -n 19 make -j48
   
-  -AMGX-input-deck:
+  test-AMGX-input-deck:
     runs-on: [self-hosted, ada]
     needs: build-AMGX-input-deck
     steps:  
