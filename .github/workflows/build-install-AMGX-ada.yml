@@ -5,10 +5,12 @@ on:
     branches: [ main ]
     paths:
       - 'external/AMGX/**'
+      - 'github/workflows/build-install-AMGX-ada.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'external/AMGX/**'
+      - 'github/workflows/build-install-AMGX-ada.yml'
   workflow_dispatch:  # allows manual triggering
 
 jobs:

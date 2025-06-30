@@ -5,10 +5,13 @@ on:
     branches: [ main ]
     paths:
       - 'external/trilinos/**'
+      - 'github/workflows/build-install-trilinos-ada.yml'
+
   pull_request:
     branches: [ main ]
     paths:
       - 'external/trilinos/**'
+      - 'github/workflows/build-install-trilinos-ada.yml'
   workflow_dispatch:  # allows manual triggering
 
 jobs:
