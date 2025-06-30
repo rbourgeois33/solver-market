@@ -39,6 +39,7 @@ jobs:
   build-amgx:
     runs-on: [self-hosted, ada]
     needs: configure-amgx
+    steps:  
     - name: build AMGX 
       working-directory: external/AMGX/build
       run: |
