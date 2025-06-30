@@ -20,7 +20,7 @@ on:
 jobs:
   prepare-amgx-input-deck:
     runs-on: [self-hosted, ada]
-    needs: build-amgx
+    #needs: build-amgx
     steps:
     - name: clone and checkout
       uses: actions/checkout@v3
