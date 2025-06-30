@@ -1,5 +1,5 @@
-template<typename _TYPE_>
-int SolverMarketCSRMatrix<_TYPE_>::send_to_device(){
+template<typename _TYPE_, typename _ITYPE_>
+int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::send_to_device(){
 
     if (not(is_allocated_)){
         std::cout<<"[Error][SolverMarket][CsrMatrix][send_to_device] You want to send to device a CSR matrix that has not been allocated\n";
@@ -14,17 +14,17 @@ int SolverMarketCSRMatrix<_TYPE_>::send_to_device(){
     return 0;
   }
 
-template<typename _TYPE_>
-int SolverMarketCSRMatrix<_TYPE_>::allocate(const size_t n, const size_t nnz){
+template<typename _TYPE_, typename _ITYPE_>
+int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::allocate(const _ITYPE_ n, const _ITYPE_ nnz){
     n_ = n;
     nnz_ = nnz;
 
-    offsets_h_ = HostView<size_t>("offsets_h_", n+1);
-    columns_h_ = HostView<size_t>("columns_h_", n);
+    offsets_h_ = HostView<_ITYPE_>("offsets_h_", n+1);
+    columns_h_ = HostView<_ITYPE_>("columns_h_", n);
     values_h_ = HostView<_TYPE_>("values_h_", nnz);
 
-    offsets_d_ = DeviceView<size_t>("offsets_d_", n+1);
-    columns_d_ = DeviceView<size_t>("columns_d_", n);
+    offsets_d_ = DeviceView<_ITYPE_>("offsets_d_", n+1);
+    columns_d_ = DeviceView<_ITYPE_>("columns_d_", n);
     values_d_ = DeviceView<_TYPE_>("values_d_", nnz);
 
     std::cout << "[Info][SolverMarket][CsrMatrix][allocate] Successfuly allocated on host and device\n";
@@ -34,22 +34,8 @@ int SolverMarketCSRMatrix<_TYPE_>::allocate(const size_t n, const size_t nnz){
     return 0;
   }
 
-enum MtxReaderStatus {
-    MtxReaderSuccess,
-    MtxReaderErrorFileNotFound,
-    MtxReaderErrorFileMemAllocFailed,
-    MtxReaderErrorWrongNnz,
-    MtxReaderErrorUpperViewButLowerFound,
-    MtxReaderErrorLowerViewButUpperFound,
-    MtxReaderErrorOutOfBoundRowIndex,
-    MtxReaderErrorOfBoundColIndex,
-    MtxReaderUnsupportedObject,
-    MtxReaderUnsupportedMatrixType,
-    MtxReaderTypeReadIsNotTypeGiven
-};
-
-template<typename _TYPE_>
-int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename, SolverMarketCSRMatrixView mview, SolverMarketCSRMatrixType mtype)
+template<typename _TYPE_, typename _ITYPE_>
+int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string filename, SolverMarketCSRMatrixView mview, SolverMarketCSRMatrixType mtype)
 {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -119,7 +105,7 @@ int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename,
             foundSize = true;
         //Get line
         } else {
-            size_t i, j;
+            _ITYPE_ i, j;
             _TYPE_ val;
             lineData >> i >> j >> val;
             i -= 1; j -= 1;  // Convert from 1-based to 0-based
@@ -135,7 +121,7 @@ int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename,
 
     if (not(foundHeader)){
         std::cerr << "[Error][SolverMarket][CsrMatrix][read_from_file] No header found in mtx file.\n";
-        return 1;
+        return MtxReaderWrongHeaderOrNoHeader;
     }
 
     file.close();
@@ -180,7 +166,7 @@ int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename,
 
 
     //Initialize with 0's
-    for (size_t i=0; i<n+1; i++){
+    for (_ITYPE_ i=0; i<n+1; i++){
         offsets_h_(i)=0;
     }
 
@@ -192,7 +178,7 @@ int SolverMarketCSRMatrix<_TYPE_>::read_matrix_market_file(std::string filename,
         }
         if (j >= n || j < 0) {
             std::cerr << "[Error][SolverMarket][CsrMatrix][read_from_file] Invalid col index " << j <<std::endl;
-            return MtxReaderErrorOfBoundColIndex;
+            return MtxReaderErrorOutOfBoundColIndex;
         }
          offsets_h_(i+1)+=1;
     }

@@ -6,7 +6,7 @@
 
 #define GTEST_
 #include "solver-market-csr-matrix.hpp"
-
+#include "solver-market-vector.hpp"
 
 
 void write_temp_file(const std::string& filename, const std::string& content) {
@@ -66,6 +66,22 @@ TEST(SolverMarketCsrMatrixReader, BasicUnsortedMatrix) {
     EXPECT_FLOAT_EQ(cols(3), 4);
 }
 
+TEST(SolverMarketCsrMatrixReader, MtxReaderWrongHeaderOrNoHeader) {
+    std::string content =
+        "5 5 4\n"
+        "3 2 3.2\n"
+        "1 1 1.0\n"
+        "2 5 2.5\n"
+        "5 5 5.5\n";
+
+    std::string filename = "test3.mtx";
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>();
+    auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull);
+
+    ASSERT_EQ(result, MtxReaderWrongHeaderOrNoHeader); // Should fail
+
+}
 
 TEST(SolverMarketCsrMatrixReader, MtxReaderUnsupportedObject) {
     std::string content =
@@ -272,7 +288,7 @@ TEST(MatrixReaderTest, InvalidColIndex) {
     auto matrix =  SolverMarketCSRMatrix<float>();
     auto result = matrix.read_matrix_market_file(filename, SolverMarketCSRMatrixFull);
 
-    ASSERT_EQ(result, MtxReaderErrorOfBoundColIndex); // Should fail
+    ASSERT_EQ(result, MtxReaderErrorOutOfBoundColIndex); // Should fail
 }
 
 
@@ -344,3 +360,162 @@ TEST(MatrixReaderTest, UnsortedColumnsWithEmptyRows) {
     ASSERT_EQ(cols(3), 2);
     ASSERT_EQ(cols(4), 1);
 } 
+
+TEST(SolverMarketVectorReader, BasicVectorRead) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real general\n"
+        "4 1 4\n"
+        "1 1 1.0\n"
+        "2 1 2.0\n"
+        "3 1 3.0\n"
+        "4 1 4.0\n";
+
+    std::string filename = "vector_valid.mtx";
+    write_temp_file(filename, content);
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderSuccess);
+    ASSERT_EQ(vec.get_n(), 4);
+    auto values = vec.get_host_values();
+    EXPECT_FLOAT_EQ(values(0), 1.0);
+    EXPECT_FLOAT_EQ(values(1), 2.0);
+    EXPECT_FLOAT_EQ(values(2), 3.0);
+    EXPECT_FLOAT_EQ(values(3), 4.0);
+}
+
+TEST(SolverMarketVectorReader, MtxReaderErrorFileNotFound) {
+
+    std::string filename = "doesnotexist.mtx";
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderErrorFileNotFound);
+}
+
+TEST(SolverMarketVectorReader, MtxReaderUnsupportedObject0) {
+    std::string content =
+        "%%MatrixMarket tensor yolo real general\n"
+        "3 1 3\n"
+        "1 2 1.0\n"
+        "3 1 2.0\n";  // lower triangle
+
+    std::string filename = "test3.mtx";
+    write_temp_file(filename, content);
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderUnsupportedObject); // Should fail
+}
+
+TEST(SolverMarketVectorReader, MtxReaderUnsupportedObject1) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real hermitian\n"
+        "4 1 4\n"
+        "1 1 1.0\n"
+        "2 1 2.0\n"
+        "3 1 3.0\n"
+        "4 1 4.0\n";
+
+    std::string filename = "vector_hermitian.mtx";
+    write_temp_file(filename, content);
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderUnsupportedMatrixType);
+}
+
+TEST(SolverMarketVectorReader, MtxReaderNotAVector0) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real general\n"
+        "4 2 4\n"
+        "1 1 1.0\n"
+        "2 1 2.0\n"
+        "3 1 3.0\n"
+        "4 1 4.0\n"
+        "4 2 4.0\n";
+
+    std::string filename = "oe.mtx";
+    write_temp_file(filename, content);
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderNotAVector);
+}
+
+TEST(SolverMarketVectorReader, MtxReaderNotAVector1) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real general\n"
+        "4 1 5\n"
+        "1 1 1.0\n"
+        "2 1 2.0\n"
+        "3 1 3.0\n"
+        "4 1 4.0\n";
+
+    std::string filename = "oe.mtx";
+    write_temp_file(filename, content);
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderNotAVector);
+}
+
+
+
+TEST(SolverMarketVectorReader, MtxReaderErrorOutOfBoundRowIndex) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real general\n"
+        "4 1 4\n"
+        "1 1 1.0\n"
+        "2 1 2.0\n"
+        "18 1 3.0\n"
+        "4 1 4.0\n";
+
+    std::string filename = "oe.mtx";
+    write_temp_file(filename, content);
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderErrorOutOfBoundRowIndex);
+}
+
+TEST(SolverMarketVectorReader, MtxReaderErrorOutOfBoundColIndex) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real general\n"
+        "4 1 4\n"
+        "1 1 1.0\n"
+        "2 1 2.0\n"
+        "3 10 3.0\n"
+        "4 1 4.0\n";
+
+    std::string filename = "oe.mtx";
+    write_temp_file(filename, content);
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderErrorOutOfBoundColIndex);
+}
+
+TEST(SolverMarketVectorReader, MtxReaderWrongHeaderOrNoHeader) {
+    std::string content =
+        "4 1 4\n"
+        "1 1 1.0\n"
+        "2 1 2.0\n"
+        "3 1 3.0\n"
+        "4 1 4.0\n";
+
+    std::string filename = "oe.mtx";
+    write_temp_file(filename, content);
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderWrongHeaderOrNoHeader);
+}

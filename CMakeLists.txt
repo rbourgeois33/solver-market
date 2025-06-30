@@ -88,13 +88,28 @@ if(BUILD_AMGX_INPUT_DECK)
 
     add_executable(AMGX_input_deck src/AMGX/AMGX-input-deck.cpp)
 
+    target_include_directories(AMGX_input_deck PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/solver-market
+    )
+
     # Output binary location
     set_target_properties(AMGX_input_deck PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/input-decks/
     )
 
-    # Link AMGX shared lib
-    target_link_libraries(AMGX_input_deck amgxsh)
+    # Link either Trilinos or fallback Kokkos
+    if(HAVE_TRILINOS)
+        target_include_directories(AMGX_input_deck PRIVATE
+            ${Trilinos_INCLUDE_DIRS}
+        )
+        target_link_libraries(AMGX_input_deck
+            PRIVATE
+            ${Trilinos_LIBRARIES} amgxsh
+        )
+    else()
+        target_link_libraries(AMGX_input_deck PRIVATE kokkos amgxsh)
+    endif()
+
 endif()
 
 # ===============================
@@ -112,33 +127,33 @@ if(BUILD_UNIT_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     # Add unit test executable
-    add_executable(unit-test-solver-market-csr-matrix tests/unit-test-solver-market-csr-matrix.cpp)
+    add_executable(unit-test-solver-market-reader tests/unit-test-solver-market-reader.cpp)
 
     # Output binary location
-    set_target_properties(unit-test-solver-market-csr-matrix PROPERTIES
+    set_target_properties(unit-test-solver-market-reader PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests/
     )
 
     # Common includes
-    target_include_directories(unit-test-solver-market-csr-matrix PRIVATE
+    target_include_directories(unit-test-solver-market-reader PRIVATE
         ${CMAKE_SOURCE_DIR}/src/solver-market
     )
 
     # Link either Trilinos or fallback Kokkos
     if(HAVE_TRILINOS)
-        target_include_directories(unit-test-solver-market-csr-matrix PRIVATE
+        target_include_directories(unit-test-solver-market-reader PRIVATE
             ${Trilinos_INCLUDE_DIRS}
         )
-        target_link_libraries(unit-test-solver-market-csr-matrix
+        target_link_libraries(unit-test-solver-market-reader
             PRIVATE
             ${Trilinos_LIBRARIES}
         )
     else()
-        target_link_libraries(unit-test-solver-market-csr-matrix PRIVATE kokkos)
+        target_link_libraries(unit-test-solver-market-reader PRIVATE kokkos)
     endif()
 
     # Link GTest
-    target_link_libraries(unit-test-solver-market-csr-matrix
+    target_link_libraries(unit-test-solver-market-reader
         PRIVATE
         GTest::gtest
         GTest::gtest_main
