@@ -20,7 +20,7 @@ jobs:
     steps:
     - name: clone and checkout
       uses: actions/checkout@v3
-    - name: Initialize and update MueLu submodule
+    - name: Initialize and update trilinos submodule
       run: |
         git submodule update --init --recursive external/trilinos
     - name: load modules
@@ -37,7 +37,7 @@ jobs:
     runs-on: [self-hosted, ada]
     working-directory: external/trilinos/build
     steps:
-    - name: configure trilinos 
+    - name: configure-trilinos 
       run: |
         [ -d build ] && rm -rf build
         mkdir build
@@ -68,6 +68,7 @@ jobs:
     runs-on: [self-hosted, ada]
     working-directory: external/trilinos/build
     steps:
+    - name: install-trilinos
       run: |
         [ -d install ] && rm -rf install
         nice -n 19 make -j48
