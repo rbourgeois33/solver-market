@@ -5,14 +5,14 @@ on:
     branches: [ main ]
     paths:
       - 'external/AMGX/**'
-      - 'src/AMGX'
-      - 'src/solver-market'
+      - 'src/AMGX/**'
+      - 'src/solver-market/**'
 
   pull_request:
     branches: [ main ]
     paths:
       - 'external/AMGX/**'
-      - 'src/AMGX'
+      - 'src/AMGX/**'
       - 'src/solver-market'
 
   workflow_dispatch:  # allows manual triggering

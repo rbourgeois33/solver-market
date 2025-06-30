@@ -12,7 +12,7 @@ void check_AMGX_error(AMGX_RC rc, const char *msg)
         AMGX_get_error_string(rc, err_string, sizeof(err_string));
         std::cerr << "Error: " << msg << " - " << err_string << std::endl;
         exit(EXIT_FAILURE);
-    }
+    } 
 }
 
 void write_vector_to_disk(const AMGX_vector_handle& vector_handle, const char* filename)
