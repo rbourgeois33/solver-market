@@ -1,0 +1,61 @@
+name: build-muelu-input-deck-ada
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'external/trilinos/**'
+      - 'src/muelu/**'
+      - 'src/solver-market/**'
+      - 'CMakeLists.txt'
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'external/trilinos/**'
+      - 'src/muelu/**'
+      - 'src/solver-market/**'
+      - 'CMakeLists.txt'
+
+
+  workflow_dispatch:  # allows manual triggering
+
+  workflow_run: #ensure that if muelu changes, the lib is built first
+    workflows: ["build-install-trilinos-ada"]
+    types:
+      - completed
+
+jobs:
+  prepare-muelu-input-deck:
+    runs-on: [self-hosted, ada]
+
+    steps:
+    - name: clone and checkout
+      uses: actions/checkout@v3
+    - name: load modules
+      run: |
+        module purge
+        module load cuda/12.8.0
+    - name: check triggering context
+      run: |
+        echo "Triggered by ${{ github.event_name }}"
+
+  configure-muelu-input-deck:
+    runs-on: [self-hosted, ada]
+    needs: prepare-muelu-input-deck
+    steps:  
+    - name: configure muelu-input-deck
+      run: |
+        [ -d build-muelu-input-deck ] && rm -rf build-muelu-input-deck
+        mkdir build-muelu-input-deck && cd build-muelu-input-deck
+        cmake .. -DBUILD_MUELU_INPUT_DECK=ON -DBUILD_muelu_INPUT_DECK=OFF -DBUILD_UNIT_TESTS=OFF
+        
+  build-muelu-input-deck:
+    runs-on: [self-hosted, ada]
+    needs: configure-muelu-input-deck
+    steps:  
+    - name: build-muelu-input-deck
+      working-directory: ./build-muelu-input-deck
+      run: |
+        nice -n 19 make -j48
+    

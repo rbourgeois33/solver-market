@@ -18,7 +18,7 @@ Usage:
 Note:
 The source code is not MueLu specific and can be used with any Stratimikos strategy.
 */
-
+ 
 // Teuchos includes
 #include <Teuchos_ConfigDefs.hpp>
 #include <Teuchos_GlobalMPISession.hpp>
