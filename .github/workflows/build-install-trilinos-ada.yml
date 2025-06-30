@@ -15,17 +15,14 @@ on:
   workflow_dispatch:  # allows manual triggering
 
 jobs:
-  build-install-trilinos-ada:
+  prepare-trilinos:
     runs-on: [self-hosted, ada]
-
     steps:
     - name: clone and checkout
       uses: actions/checkout@v3
-
     - name: Initialize and update MueLu submodule
       run: |
         git submodule update --init --recursive external/trilinos
-
     - name: load modules
       run: |
         module purge
@@ -35,9 +32,12 @@ jobs:
         export CXX=$WRAPPER_PATH
         echo "OMPI_CXX=$OMPI_CXX"
         echo "CXX=$CXX"
-    
+
+  configure-trilinos:
+    runs-on: [self-hosted, ada]
+    working-directory: external/trilinos/build
+    steps:
     - name: configure trilinos 
-      working-directory: external/trilinos
       run: |
         [ -d build ] && rm -rf build
         mkdir build
@@ -64,8 +64,10 @@ jobs:
         -D MueLu_ENABLE_CUSPARSE=ON \
         ..
           
-    - name: build trilinos 
-      working-directory: external/trilinos/build
+  build-trilinos:
+    runs-on: [self-hosted, ada]
+    working-directory: external/trilinos/build
+    steps:
       run: |
         [ -d install ] && rm -rf install
         nice -n 19 make -j48
