@@ -94,7 +94,7 @@ if(BUILD_AMGX_INPUT_DECK)
     )
 
     # Link AMGX shared lib
-    target_link_libraries(AMGX_input_deck AMGXsh)
+    target_link_libraries(AMGX_input_deck amgxsh)
 endif()
 
 # ===============================
