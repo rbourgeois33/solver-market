@@ -35,7 +35,7 @@ jobs:
     - name: load modules
       run: |
         module purge
-        module load $MODULES_TO_LOAD
+        module load $MODULE_LIST
         export WRAPPER_PATH="${{ github.workspace }}/${{ env.TRILINOS_PATH }}/packages/kokkos/bin/nvcc_wrapper"
         export OMPI_CXX=$WRAPPER_PATH
         export CXX=$WRAPPER_PATH
@@ -50,7 +50,7 @@ jobs:
         [ -d install ] && rm -rf install
         mkdir install
         
-         cmake -B build -S . \
+        cmake -B build -S . \
         -D CMAKE_INSTALL_PREFIX=../install \
         -D CMAKE_BUILD_TYPE=RELEASE \
         -D BUILD_SHARED_LIBS:BOOL=ON \
@@ -69,8 +69,7 @@ jobs:
         -D MueLu_ENABLE_TESTS:BOOL=ON \
         -D MueLu_ENABLE_EXAMPLES:BOOL=ON \
         -D MueLu_ENABLE_CUSPARSE=ON \
-        ${{ env.AMGX_CMAKE_OPTIONS }} \
-        ..
+        ${{ env.AMGX_CMAKE_OPTIONS }}
         
     - name: build and install trilinos
       working-directory: ${{ env.TRILINOS_PATH }}

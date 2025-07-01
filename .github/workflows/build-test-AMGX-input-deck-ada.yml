@@ -1,5 +1,12 @@
 name: build-test-AMGX-input-deck-ada
- 
+
+env:
+  PATH: AMGX-input-deck
+  SOLVER_MARKET_CMAKE_OPTIONS: "-DBUILD_MUELU_INPUT_DECK=OFF -DBUILD_AMGX_INPUT_DECK=ON -DBUILD_UNIT_TESTS=OFF"
+  NICE_PRIORITY: 19
+  NPROCS: 48
+  MODULE_LIST: "cuda/12.8.0"
+
 on:
   push:
     branches: [ main ]
@@ -30,46 +37,28 @@ on:
       - completed
 
 jobs:
-  prepare-AMGX-input-deck:
+  build-AMGX-input-deck-ada:
     runs-on: [self-hosted, ada]
 
     steps:
     - name: clone and checkout
       uses: actions/checkout@v3
+
     - name: load modules
-      run: |
-        module purge
-        module load cuda/12.8.0
-    - name: check triggering context
-      run: |
-        echo "Triggered by ${{ github.event_name }}"
+      run: module load $MODULE_LIST
 
-  configure-AMGX-input-deck:
-    runs-on: [self-hosted, ada]
-    needs: prepare-AMGX-input-deck
-    steps:  
-    - name: configure AMGX-input-deck
-      run: |
-        [ -d build-AMGX-input-deck ] && rm -rf build-AMGX-input-deck
-        mkdir build-AMGX-input-deck && cd build-AMGX-input-deck
-        cmake .. -DBUILD_MUELU_INPUT_DECK=OFF -DBUILD_AMGX_INPUT_DECK=ON -DBUILD_UNIT_TESTS=OFF
-        
-  build-AMGX-input-deck:
-    runs-on: [self-hosted, ada]
-    needs: configure-AMGX-input-deck
-    steps:  
-    - name: build-AMGX-input-deck
-      working-directory: ./build-AMGX-input-deck
-      run: |
-        nice -n 19 make -j48
-  
-  test-AMGX-input-deck:
-    runs-on: [self-hosted, ada]
-    needs: build-AMGX-input-deck
-    steps:  
-    - name: test-AMGX-input-deck
-      working-directory: ./build-AMGX-input-deck
-      run: |
-        ./input-decks/AMGX_input_deck  --matrix=../matrices/aij_51840.mtx  --config=../external/AMGX/src/configs/PCG_V.json 
 
-    
+    - name: configure AMGX input deck
+      run: |
+        [ -d build-$PATH ] && rm -rf build-$PATH
+        cmake -B build-$PATH -S . $SOLVER_MARKET_CMAKE_OPTIONS
+
+    - name: run AMGX input deck test
+      working-directory: ./build-$PATH
+      run: |
+        nice -n $NICE_PRIORITY ./input-decks/AMGX_input_deck --matrix=../matrices/aij_51840.mtx --config=../external/AMGX/src/configs/PCG_V.json
+
+    - name: build AMGX input deck
+      working-directory: ./build-$PATH
+      run: |
+        nice -n $NICE_PRIORITY cmake --build . -- -j $NPROCS
