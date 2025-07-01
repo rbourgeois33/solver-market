@@ -43,7 +43,7 @@ jobs:
         
         module purge; 
         module load ${{ env.MODULE_LIST }}; 
-        export WRAPPER=${{ github.workspace }}/external/trilinos/install/packages/kokkos/bin/nvcc_wrapper; 
+        export WRAPPER=${{ github.workspace }}/external/trilinos/packages/kokkos/bin/nvcc_wrapper; 
         export OMPI_CXX=$WRAPPER; 
         export CXX=$WRAPPER; 
         module list
@@ -75,9 +75,11 @@ jobs:
       run: |
         module purge; 
         module load ${{ env.MODULE_LIST }}; 
-        export WRAPPER_path=${{ github.workspace }}/external/trilinos/install/packages/kokkos/bin/nvcc_wrapper; 
-        export OMPI_CXX=$WRAPPER_path; 
-        export CXX=$WRAPPER_path; 
+        export WRAPPER=${{ github.workspace }}/external/trilinos/packages/kokkos/bin/nvcc_wrapper; 
+        export OMPI_CXX=$WRAPPER; 
+        export CXX=$WRAPPER; 
+        module list
+        echo $CXX
 
         nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
         make install
