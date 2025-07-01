@@ -26,6 +26,7 @@ jobs:
       run: |
         module purge
         module load cuda/12.8.0
+        
     - name: reset build and install 
       working-directory: external/trilinos
       run: |

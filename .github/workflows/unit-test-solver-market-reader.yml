@@ -33,7 +33,7 @@ jobs:
         echo "OMPI_CXX=$OMPI_CXX"
         echo "CXX=$CXX"
 
-    - name: reset build and install 
+    - name: reset build and install for trilinos
       working-directory: external/trilinos
       run: |
         [ -d build ] && rm -rf build
@@ -41,7 +41,7 @@ jobs:
         [ -d install ] && rm -rf install
         mkdir install
 
-    - name: configure-trilinos 
+    - name: configure trilinos in debug mode, for kokkos only
       working-directory: external/trilinos/build
       run: |
         cmake \
@@ -53,7 +53,7 @@ jobs:
         -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=ON \
         ..
 
-    - name: install-trilinos
+    - name: install trilinos, kokkos only
       working-directory: external/trilinos/build
       run: |
         nice -n 19 make -j48

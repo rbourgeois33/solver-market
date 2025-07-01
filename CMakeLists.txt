@@ -14,10 +14,13 @@ option(BUILD_AMGX_INPUT_DECK "Build AMGX input deck example" ON)
 option(BUILD_UNIT_TESTS "Build unit tests" ON)
 
 # ===============================
-# 🔍 Try to Find Trilinos
+# 🔍 Getting Trilinos
 # ===============================
 
-# Set the Trilinos install location
+# Trilinos provides both kokkos and solvers that we use in this repo
+# Moreover, Kokkos is at the core of our solver-market routines.
+# herefore, even if we are not using trilinos's solver, we still want kokkos.
+# Set the Trilinos and kokkos install location
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external/trilinos/install ${CMAKE_PREFIX_PATH})
 set(Kokkos_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/include/kokkos)
 set(Trilinos_LIB_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/lib)
@@ -91,14 +94,14 @@ if(BUILD_AMGX_INPUT_DECK)
 
     add_executable(AMGX_input_deck src/AMGX/AMGX-input-deck.cpp)
 
-    target_include_directories(AMGX_input_deck PRIVATE
-        ${CMAKE_SOURCE_DIR}/src/solver-market
-        ${Kokkos_INCLUDE_DIR} 
-    )
-
     # Output binary location
     set_target_properties(AMGX_input_deck PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/input-decks/
+    )
+
+    target_include_directories(AMGX_input_deck PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/solver-market
+        ${Kokkos_INCLUDE_DIR} 
     )
 
     target_link_libraries(AMGX_input_deck
@@ -106,8 +109,6 @@ if(BUILD_AMGX_INPUT_DECK)
         ${Trilinos_LIBRARIES} amgxsh
         "${Trilinos_LIB_DIR}/libkokkoscore.so"
     )
-
-
 endif()
 
 # ===============================
@@ -137,7 +138,6 @@ if(BUILD_UNIT_TESTS)
         ${CMAKE_SOURCE_DIR}/src/solver-market
         ${Kokkos_INCLUDE_DIR} 
         ${Trilinos_INCLUDE_DIRS}
-
     )
 
     # Link GTest
