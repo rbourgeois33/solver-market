@@ -43,9 +43,11 @@ jobs:
         
         module purge; 
         module load ${{ env.MODULE_LIST }}; 
-        export WRAPPER_path=${{ github.workspace }}/external/trilinos/install/packages/kokkos/bin/nvcc_wrapper; 
-        export OMPI_CXX=$WRAPPER_path; 
-        export CXX=$WRAPPER_path; 
+        export WRAPPER=${{ github.workspace }}/external/trilinos/install/packages/kokkos/bin/nvcc_wrapper; 
+        export OMPI_CXX=$WRAPPER; 
+        export CXX=$WRAPPER; 
+        module list
+        echo $CXX
 
         cmake -B build -S . \
         -D CMAKE_INSTALL_PREFIX=../install \
