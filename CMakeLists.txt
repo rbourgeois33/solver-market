@@ -21,7 +21,7 @@ option(BUILD_UNIT_TESTS "Build unit tests" ON)
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external/trilinos/install ${CMAKE_PREFIX_PATH})
 
 # Try to find Trilinos
-find_package(Trilinos REQUIRED)
+find_package(Trilinos REQUIRED COMPONENTS Kokkos)
 
 # Verify Trilinos was found
 if(NOT Trilinos_FOUND)
@@ -38,6 +38,7 @@ message(STATUS "✅ Trilinos found")
 message(STATUS "Trilinos version: ${Trilinos_VERSION}")
 message(STATUS "Trilinos packages: ${Trilinos_PACKAGE_LIST}")
 message(STATUS "Trilinos TPLs:     ${Trilinos_TPL_LIST}")
+message(STATUS "Trilinos_INCLUDE_DIRS: ${Trilinos_INCLUDE_DIRS}")
 
 # ===============================
 # 🔧 Build muelu_input_deck
