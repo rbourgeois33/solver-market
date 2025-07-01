@@ -1,5 +1,13 @@
 name: build-install-AMGX-ada
- 
+
+env:
+  RUNNER_LABEL: self-hosted,ada
+  AMGX_PATH: external/AMGX
+  AMGX_CMAKE_OPTIONS: -D CUDA_ARCH=80 -D CMAKE_BUILD_TYPE=Release
+  NICE_PRIORITY: 19
+  NPROCS: 48
+  MODULE_LIST: "cuda/12.8.0"  
+
 on:
   push:
     branches: [ main ]
@@ -14,51 +22,29 @@ on:
   workflow_dispatch:  # allows manual triggering
 
 jobs:
-  prepare-AMGX:
-    runs-on: [self-hosted, ada]
+  build-install-AMGX-ada:
+    runs-on: [${{ env.RUNNER_LABEL }}]
     steps:
     - name: clone and checkout
       uses: actions/checkout@v3
-    - name: Initialize and update AMGX submodule
+      
+    - name: get the AMGX submodule
       run: |
-        git submodule update --init --recursive external/AMGX
+        git submodule update --init --recursive ${{ env.AMGX_PATH }}
+
     - name: load modules
       run: |
         module purge
-        module load cuda/12.8.0
-        
-    - name: reset build and install 
-      working-directory: external/trilinos
+        module load $MODULES_TO_LOAD
+
+    - name: reset build and configure
+      working-directory: ${{ env.AMGX_PATH }}
       run: |
         [ -d build ] && rm -rf build
-        mkdir build
+        cmake -B build -S . -D ${{ env.AMGX_CMAKE_OPTIONS }}
 
-  configure-AMGX:
-    runs-on: [self-hosted, ada]
-    needs: prepare-AMGX
-    steps:  
-    - name: configure AMGX 
-      working-directory: external/AMGX/build
-      run: |
-        cmake -DCUDA_ARCH="80" ..
-    
-  build-AMGX:
-    runs-on: [self-hosted, ada]
-    needs: configure-AMGX
-    steps:  
     - name: build AMGX 
-      working-directory: external/AMGX/build
+      working-directory: ${{ env.AMGX_PATH }}
       run: |
-        nice -n 19 make -j48
+        nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
     
-    # - name: cache AMGX install
-    #   uses: actions/cache@v3
-    #   with:
-    #     path: external/AMGX/install
-    #     key: AMGX-install-ada
-
-    # - name: cache AMGX build
-    #   uses: actions/cache@v3
-    #   with:
-    #     path: external/AMGX/build
-    #     key: AMGX-build-ada
