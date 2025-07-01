@@ -71,7 +71,7 @@ jobs:
         ${{ env.CMAKE_OPTIONS }}
         
     - name: build and install trilinos
-      working-directory: ${{ env.JOBPATH }}
+      working-directory: ${{ env.JOBPATH }}/build
       run: |
         module purge; 
         module load ${{ env.MODULE_LIST }}; 
