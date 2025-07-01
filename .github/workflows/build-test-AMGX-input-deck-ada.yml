@@ -1,7 +1,7 @@
 name: build-test-AMGX-input-deck-ada
 
 env:
-  PATH: build-AMGX-input-deck
+  JOBPATH: build-AMGX-input-deck
   CMAKE_OPTIONS: "-DBUILD_MUELU_INPUT_DECK=OFF -DBUILD_AMGX_INPUT_DECK=ON -DBUILD_UNIT_TESTS=OFF"
   NICE_PRIORITY: 19
   NPROCS: 48
@@ -10,7 +10,7 @@ env:
 on:
   push:
     branches: [ main ]
-    paths:
+    JOBPATHs:
       - '.github/workflows/build-test-AMGX-input-deck-ada.yml'
       - '.github/workflows/build-install-AMGX-ada.yml'
       - 'external/AMGX/**'
@@ -20,7 +20,7 @@ on:
 
   pull_request:
     branches: [ main ]
-    paths:
+    JOBPATHs:
       - '.github/workflows/build-test-AMGX-input-deck-ada.yml'
       - '.github/workflows/build-install-AMGX-ada.yml'
       - 'external/AMGX/**'
@@ -49,15 +49,15 @@ jobs:
 
     - name: configure AMGX input deck
       run: |
-        [ -d $PATH ] && rm -rf $PATH
-        cmake -B $PATH -S . $CMAKE_OPTIONS
+        [ -d $JOBPATH ] && rm -rf $JOBPATH
+        cmake -B $JOBPATH -S . $CMAKE_OPTIONS
 
     - name: run AMGX input deck test
-      working-directory: ./$PATH
+      working-directory: ./$JOBPATH
       run: |
         nice -n $NICE_PRIORITY ./input-decks/AMGX_input_deck --matrix=../matrices/aij_51840.mtx --config=../external/AMGX/src/configs/PCG_V.json
 
     - name: build AMGX input deck
-      working-directory: ./$PATH
+      working-directory: ./$JOBPATH
       run: |
         nice -n $NICE_PRIORITY cmake --build . -- -j $NPROCS

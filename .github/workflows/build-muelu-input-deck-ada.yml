@@ -1,7 +1,7 @@
 name: build-muelu-input-deck-ada
 
 env:
-  PATH: build-muelu-input-deck
+  JOBPATH: build-muelu-input-deck
   CMAKE_OPTIONS: "-DBUILD_MUELU_INPUT_DECK=ON -DBUILD_AMGX_INPUT_DECK=OFF -DBUILD_UNIT_TESTS=OFF"
   NICE_PRIORITY: 19
   NPROCS: 48
@@ -10,7 +10,7 @@ env:
 on:
   push:
     branches: [ main ]
-    paths:
+    JOBPATHs:
       - '.github/workflows/build-muelu-input-deck.yml'
       - '.github/workflows/build-install-trilinos-ada.yml'
       - 'external/trilinos/**'
@@ -19,7 +19,7 @@ on:
       - 'CMakeLists.txt'
   pull_request:
     branches: [ main ]
-    paths:
+    JOBPATHs:
       - '.github/workflows/build-muelu-input-deck.yml'
       - '.github/workflows/build-install-trilinos-ada.yml'
       - 'external/trilinos/**'
@@ -52,14 +52,14 @@ jobs:
     steps:
     - name: configure muelu input deck
       run: |
-        [ -d $PATH ] && rm -rf $PATH
-        cmake -B $PATH -S . $CMAKE_OPTIONS
+        [ -d $JOBPATH ] && rm -rf $JOBPATH
+        cmake -B $JOBPATH -S . $CMAKE_OPTIONS
 
   build-muelu-input-deck:
     runs-on: [self-hosted, ada]
     needs: configure-muelu-input-deck
     steps:
     - name: build muelu input deck
-      working-directory: ./$PATH
+      working-directory: ./$JOBPATH
       run: |
         nice -n $NICE_PRIORITY cmake --build . -- -j $NPROCS
