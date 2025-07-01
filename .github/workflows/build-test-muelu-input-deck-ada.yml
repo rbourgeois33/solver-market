@@ -51,7 +51,7 @@ jobs:
         cmake -B $JOBPATH -S . $CMAKE_OPTIONS
 
     - name: build muelu input deck
-      working-directory: ${{ env.JOBPATH }
+      working-directory: ${{ env.JOBPATH }}
       run: |
         module purge
         module load ${{ env.MODULE_LIST }}
