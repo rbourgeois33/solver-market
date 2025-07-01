@@ -16,10 +16,21 @@ option(BUILD_UNIT_TESTS "Build unit tests" ON)
 # ===============================
 # 🔍 Try to Find Trilinos
 # ===============================
-set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external/trilinos/install ${CMAKE_PREFIX_PATH})
+# Try to find Trilinos
+find_package(Trilinos REQUIRED)
 
-message(STATUS "Trilinos found")
-set(HAVE_TRILINOS TRUE)
+# Verify Trilinos was found
+if(NOT Trilinos_FOUND)
+    message(FATAL_ERROR "Trilinos not found! Please build and install Trilinos with Kokkos enabled.")
+endif()
+
+# Verify Kokkos is available within Trilinos
+if(NOT "Kokkos" IN_LIST Trilinos_PACKAGE_LIST)
+    message(FATAL_ERROR "Trilinos found, but does not include the Kokkos package! Please enable Kokkos in your Trilinos build.")
+endif()
+
+# Debug output
+message(STATUS "✅ Trilinos found")
 message(STATUS "Trilinos version: ${Trilinos_VERSION}")
 message(STATUS "Trilinos packages: ${Trilinos_PACKAGE_LIST}")
 message(STATUS "Trilinos TPLs:     ${Trilinos_TPL_LIST}")
