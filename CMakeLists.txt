@@ -26,7 +26,7 @@ set(Kokkos_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/include/kok
 set(Trilinos_LIB_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/lib)
 
 # Try to find Trilinos
-find_package(Trilinos REQUIRED COMPONENTS Kokkos)
+find_package(Trilinos REQUIRED)
 
 # Verify Trilinos was found
 if(NOT Trilinos_FOUND)
