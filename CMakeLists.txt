@@ -17,29 +17,12 @@ option(BUILD_UNIT_TESTS "Build unit tests" ON)
 # 🔍 Try to Find Trilinos
 # ===============================
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external/trilinos/install ${CMAKE_PREFIX_PATH})
-find_package(Trilinos QUIET)
 
-if(Trilinos_FOUND)
-    message(STATUS "Trilinos found")
-    set(HAVE_TRILINOS TRUE)
-    message(STATUS "Trilinos version: ${Trilinos_VERSION}")
-    message(STATUS "Trilinos packages: ${Trilinos_PACKAGE_LIST}")
-    message(STATUS "Trilinos TPLs:     ${Trilinos_TPL_LIST}")
-else()
-    message(WARNING "Trilinos not found! Attempting to fetch and build Kokkos for unit tests...")
-
-    # Download Kokkos as fallback (for unit tests)
-    include(FetchContent)
-    FetchContent_Declare(
-        kokkos
-        GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-        GIT_TAG 4.2.00
-    )
-    set(Kokkos_ENABLE_SERIAL ON CACHE BOOL "Enable Serial backend")
-    set(Kokkos_ENABLE_TESTS OFF CACHE BOOL "Disable Kokkos tests")
-    FetchContent_MakeAvailable(kokkos)
-    set(HAVE_TRILINOS FALSE)
-endif()
+message(STATUS "Trilinos found")
+set(HAVE_TRILINOS TRUE)
+message(STATUS "Trilinos version: ${Trilinos_VERSION}")
+message(STATUS "Trilinos packages: ${Trilinos_PACKAGE_LIST}")
+message(STATUS "Trilinos TPLs:     ${Trilinos_TPL_LIST}")
 
 # ===============================
 # 🔧 Build muelu_input_deck
@@ -97,23 +80,20 @@ if(BUILD_AMGX_INPUT_DECK)
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/input-decks/
     )
 
-    # Link either Trilinos or fallback Kokkos
-    if(HAVE_TRILINOS)
-        target_include_directories(AMGX_input_deck PRIVATE
-            ${Trilinos_INCLUDE_DIRS}
-        )
-        target_link_libraries(AMGX_input_deck
-            PRIVATE
-            ${Trilinos_LIBRARIES} amgxsh
-        )
-    else()
-        target_link_libraries(AMGX_input_deck PRIVATE kokkos amgxsh)
-    endif()
+    # Link to Trilinos
+    target_include_directories(AMGX_input_deck PRIVATE
+        ${Trilinos_INCLUDE_DIRS}
+    )
+    target_link_libraries(AMGX_input_deck
+        PRIVATE
+        ${Trilinos_LIBRARIES} amgxsh
+    )
+
 
 endif()
 
 # ===============================
-# 🔧 Unit Tests with GTest + Kokkos fallback
+# 🔧 Unit Tests with GTest + kokkos from trilinos
 # ===============================
 if(BUILD_UNIT_TESTS)
     # Fetch GoogleTest
@@ -139,18 +119,14 @@ if(BUILD_UNIT_TESTS)
         ${CMAKE_SOURCE_DIR}/src/solver-market
     )
 
-    # Link either Trilinos or fallback Kokkos
-    if(HAVE_TRILINOS)
-        target_include_directories(unit-test-solver-market-reader PRIVATE
-            ${Trilinos_INCLUDE_DIRS}
-        )
-        target_link_libraries(unit-test-solver-market-reader
-            PRIVATE
-            ${Trilinos_LIBRARIES}
-        )
-    else()
-        target_link_libraries(unit-test-solver-market-reader PRIVATE kokkos)
-    endif()
+    # Link to Trilinos (for kokkos)
+    target_include_directories(unit-test-solver-market-reader PRIVATE
+        ${Trilinos_INCLUDE_DIRS}
+    )
+    target_link_libraries(unit-test-solver-market-reader
+        PRIVATE
+        ${Trilinos_LIBRARIES}
+    )
 
     # Link GTest
     target_link_libraries(unit-test-solver-market-reader
@@ -168,5 +144,4 @@ message(STATUS "======== Build Configuration ========")
 message(STATUS "BUILD_MUELU_INPUT_DECK: ${BUILD_MUELU_INPUT_DECK}")
 message(STATUS "BUILD_AMGX_INPUT_DECK:  ${BUILD_AMGX_INPUT_DECK}")
 message(STATUS "BUILD_UNIT_TESTS:       ${BUILD_UNIT_TESTS}")
-message(STATUS "Trilinos available:     ${HAVE_TRILINOS}")
 message(STATUS "=====================================")

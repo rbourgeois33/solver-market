@@ -22,6 +22,42 @@ jobs:
     - name: clone and checkout
       uses: actions/checkout@v3
 
+    - name: Initialize and update trilinos submodule
+      run: |
+        git submodule update --init --recursive external/trilinos
+    - name: load modules
+      run: |
+        export WRAPPER_PATH="${{ github.workspace }}/external/trilinos/packages/kokkos/bin/nvcc_wrapper"
+        export OMPI_CXX=$WRAPPER_PATH
+        export CXX=$WRAPPER_PATH
+        echo "OMPI_CXX=$OMPI_CXX"
+        echo "CXX=$CXX"
+
+    - name: reset build and install 
+      working-directory: external/trilinos
+      run: |
+        [ -d build ] && rm -rf build
+        mkdir build
+        [ -d install ] && rm -rf install
+        mkdir install
+
+    - name: configure-trilinos 
+      working-directory: external/trilinos/build
+      run: |
+        cmake \
+        -D CMAKE_INSTALL_PREFIX=../install \
+        -D CMAKE_BUILD_TYPE=DEBUG \
+        -D BUILD_SHARED_LIBS:BOOL=ON \
+        -D Kokkos_ENABLE_DEBUG=ON \
+        -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=ON \
+        ..
+
+    - name: install-trilinos
+      working-directory: external/trilinos/build
+      run: |
+        nice -n 19 make -j48
+        make install
+
     - name: create build
       run: mkdir build
 
