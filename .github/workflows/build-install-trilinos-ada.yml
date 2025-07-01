@@ -14,42 +14,43 @@ on:
       - '.github/workflows/build-install-trilinos-ada.yml'
   workflow_dispatch:  # allows manual triggering
 
+env:
+  TRILINOS_PATH: external/trilinos
+  TRILINOS_CMAKE_OPTIONS: -D Kokkos_ARCH_ADA89=ON
+  NICE_PRIORITY: 19
+  NPROCS: 48
+  MODULE_LIST: "cuda/12.8.0"  
+
 jobs:
-  prepare-trilinos:
+  build-install-trilinos-ada:
     runs-on: [self-hosted, ada]
     steps:
+
     - name: clone and checkout
       uses: actions/checkout@v3
+
     - name: Initialize and update trilinos submodule
-      run: |
-        git submodule update --init --recursive external/trilinos
+      run: git submodule update --init --recursive ${{ env.TRILINOS_PATH }}
+        
     - name: load modules
       run: |
         module purge
-        module load cuda/12.8.0
-        export WRAPPER_PATH="${{ github.workspace }}/external/trilinos/packages/kokkos/bin/nvcc_wrapper"
+        module load $MODULES_TO_LOAD
+        export WRAPPER_PATH="${{ github.workspace }}/${{ env.TRILINOS_PATH }}/packages/kokkos/bin/nvcc_wrapper"
         export OMPI_CXX=$WRAPPER_PATH
         export CXX=$WRAPPER_PATH
         echo "OMPI_CXX=$OMPI_CXX"
         echo "CXX=$CXX"
-    - name: reset build and install 
-      working-directory: external/trilinos
+
+    - name: reset build and configure
+      working-directory: ${{ env.TRILINOS_PATH }}
       run: |
         [ -d build ] && rm -rf build
         mkdir build
         [ -d install ] && rm -rf install
         mkdir install
-
-
-
-  configure-trilinos:
-    runs-on: [self-hosted, ada]
-    needs: prepare-trilinos
-    steps:
-    - name: configure-trilinos 
-      working-directory: external/trilinos/build
-      run: |
-        cmake \
+        
+         cmake -B build -S . \
         -D CMAKE_INSTALL_PREFIX=../install \
         -D CMAKE_BUILD_TYPE=RELEASE \
         -D BUILD_SHARED_LIBS:BOOL=ON \
@@ -59,7 +60,6 @@ jobs:
         -D Trilinos_ENABLE_MueLu:BOOL=ON \
         -D Kokkos_ENABLE_DEBUG=OFF \
         -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=OFF \
-        -D Kokkos_ARCH_ADA89=ON \
         -D TPL_ENABLE_BLAS:BOOL=ON \
         -D TPL_ENABLE_MPI:BOOL=ON \
         -D TPL_ENABLE_CUSOLVER=ON \
@@ -69,26 +69,12 @@ jobs:
         -D MueLu_ENABLE_TESTS:BOOL=ON \
         -D MueLu_ENABLE_EXAMPLES:BOOL=ON \
         -D MueLu_ENABLE_CUSPARSE=ON \
+        ${{ env.AMGX_CMAKE_OPTIONS }} \
         ..
-          
-  build-install-trilinos:
-    runs-on: [self-hosted, ada]
-    needs: configure-trilinos
-    steps:
-    - name: install-trilinos
-      working-directory: external/trilinos/build
+        
+    - name: build and install trilinos
+      working-directory: ${{ env.TRILINOS_PATH }}
       run: |
-        nice -n 19 make -j48
+        nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
         make install
     
-    # - name: cache trilinos install
-    #   uses: actions/cache@v3
-    #   with:
-    #     path: external/trilinos/install
-    #     key: trilinos-install-ada
-
-    # - name: cache trilinos build
-    #   uses: actions/cache@v3
-    #   with:
-    #     path: external/trilinos/build
-    #     key: trilinos-build-ada
