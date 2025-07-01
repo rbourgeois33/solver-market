@@ -1,7 +1,7 @@
-name: build-muelu-input-deck-ada
+name: build-test-muelu-input-deck-ada
 
 env:
-  JOBPATH: build-muelu-input-deck
+  JOBPATH: build-test-muelu-input-deck
   CMAKE_OPTIONS: "-DBUILD_MUELU_INPUT_DECK=ON -DBUILD_AMGX_INPUT_DECK=OFF -DBUILD_UNIT_TESTS=OFF"
   NICE_PRIORITY: 19
   NPROCS: 48
@@ -11,29 +11,32 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '.github/workflows/build-muelu-input-deck.yml'
-      - '.github/workflows/build-install-trilinos-ada.yml'
-      - 'external/trilinos/**'
+      - '.github/workflows/build-test-muelu-input-deck.yml'
+      #- '.github/workflows/build-install-trilinos-ada.yml'
+      #- 'external/trilinos/**'
       - 'src/muelu/**'
       - 'src/solver-market/**'
       - 'CMakeLists.txt'
   pull_request:
     branches: [ main ]
     paths:
-      - '.github/workflows/build-muelu-input-deck.yml'
-      - '.github/workflows/build-install-trilinos-ada.yml'
-      - 'external/trilinos/**'
+      - '.github/workflows/build-test-muelu-input-deck.yml'
+      #- '.github/workflows/build-install-trilinos-ada.yml'
+      #- 'external/trilinos/**'
       - 'src/muelu/**'
       - 'src/solver-market/**'
       - 'CMakeLists.txt'
   workflow_dispatch:
+  
+  #if the build of trilinos is triggered, this job will be too, after
+  #This is why the two elements are commented above
   workflow_run:
     workflows: ["build-install-trilinos-ada"]
     types:
       - completed
 
 jobs:
-  build-muelu-input-deck-ada:
+  build-test-muelu-input-deck-ada:
     runs-on: [self-hosted, ada]
     steps:
     

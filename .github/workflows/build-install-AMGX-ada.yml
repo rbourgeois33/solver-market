@@ -40,7 +40,7 @@ jobs:
         cmake -B build -S . ${{ env.AMGX_CMAKE_OPTIONS }}
 
     - name: build AMGX 
-      working-directory: ${{ env.JOBPATH }}
+      working-directory: ${{ env.JOBPATH }}/build
       run: |
         module purge
         module load ${{ env.MODULE_LIST }}
