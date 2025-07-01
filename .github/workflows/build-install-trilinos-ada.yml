@@ -41,10 +41,14 @@ jobs:
         export CXX=$WRAPPER_JOBPATH
         echo "OMPI_CXX=$OMPI_CXX"
         echo "CXX=$CXX"
+        module list
+
 
     - name: reset build and configure
       working-directory: ${{ env.JOBPATH }}
       run: |
+
+        module list
         [ -d build ] && rm -rf build
         mkdir build
         [ -d install ] && rm -rf install
