@@ -1,0 +1,75 @@
+name: build-install-trilinos-kokkos-only-ada
+
+env:
+  JOBPATH: external/trilinos
+  CMAKE_OPTIONS: -D Kokkos_ARCH_ADA89=ON
+  NICE_PRIORITY: 19
+  NPROCS: 48
+  MODULE_LIST: "cuda/12.8.0"  
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'external/trilinos/**'
+      - '.github/workflows/build-install-trilinos-kokkos-only-ada.yml'
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'external/trilinos/**'
+      - '.github/workflows/build-install-trilinos-kokkos-only-ada.yml'
+  workflow_dispatch:  # allows manual triggering
+
+jobs:
+  build-install-trilinos-kokkos-only-ada:
+    runs-on: [self-hosted, ada]
+    steps:
+
+    - name: clone and checkout
+      uses: actions/checkout@v3
+
+    - name: Initialize and update trilinos submodule
+      run: git submodule update --init --recursive ${{ env.JOBPATH }}
+        
+
+    - name: reset build and configure
+      working-directory: ${{ env.JOBPATH }}
+      run: |
+        [ -d build-kokkos ] && rm -rf build-kokkos
+        mkdir build-kokkos
+        [ -d install-kokkos ] && rm -rf install-kokkos
+        mkdir install-kokkos
+        
+        module purge; 
+        module load ${{ env.MODULE_LIST }}; 
+        export WRAPPER=${{ github.workspace }}/external/trilinos/packages/kokkos/bin/nvcc_wrapper; 
+        export OMPI_CXX=$WRAPPER; 
+        export CXX=$WRAPPER; 
+        module list
+        echo $CXX
+
+        cmake -B build-kokkos -S . \
+        -D CMAKE_INSTALL_PREFIX=../install-kokkos \
+        -D CMAKE_BUILD_TYPE=RELEASE \
+        -D BUILD_SHARED_LIBS:BOOL=ON \
+        -D Trilinos_ENABLE_EXPLICIT_INSTANTIATION:BOOL=ON \
+        -D Trilinos_ENABLE_Kokkos=ON \
+        -D Kokkos_ENABLE_DEBUG=OFF \
+        -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=OFF \
+        ${{ env.CMAKE_OPTIONS }}
+        
+    - name: build and install trilinos
+      working-directory: ${{ env.JOBPATH }}/build-kokkos
+      run: |
+        module purge; 
+        module load ${{ env.MODULE_LIST }}; 
+        export WRAPPER=${{ github.workspace }}/external/trilinos/packages/kokkos/bin/nvcc_wrapper; 
+        export OMPI_CXX=$WRAPPER; 
+        export CXX=$WRAPPER; 
+        module list
+        echo $CXX
+
+        nice -n ${{ env.NICE_PRIORITY }} make -j${{ env.NPROCS }}
+        make install
+    
