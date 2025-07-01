@@ -10,7 +10,7 @@ env:
 on:
   push:
     branches: [ main ]
-    JOBPATHs:
+    paths:
       - '.github/workflows/build-muelu-input-deck.yml'
       - '.github/workflows/build-install-trilinos-ada.yml'
       - 'external/trilinos/**'
@@ -19,7 +19,7 @@ on:
       - 'CMakeLists.txt'
   pull_request:
     branches: [ main ]
-    JOBPATHs:
+    paths:
       - '.github/workflows/build-muelu-input-deck.yml'
       - '.github/workflows/build-install-trilinos-ada.yml'
       - 'external/trilinos/**'
@@ -39,19 +39,14 @@ jobs:
     - name: clone and checkout
       uses: actions/checkout@v3
 
-    - name: load modules
-        module load ${{ env.MODULE_LIST }}
-
-
-    - name: check triggering context
-      run: echo "Triggered by ${{ github.event_name }}"
-
   configure-muelu-input-deck:
     runs-on: [self-hosted, ada]
     needs: prepare-muelu-input-deck
     steps:
     - name: configure muelu input deck
       run: |
+        module purge
+        module load ${{ env.MODULE_LIST }}
         [ -d $JOBPATH ] && rm -rf $JOBPATH
         cmake -B $JOBPATH -S . $CMAKE_OPTIONS
 
@@ -62,4 +57,6 @@ jobs:
     - name: build muelu input deck
       working-directory: ./$JOBPATH
       run: |
+        module purge
+        module load ${{ env.MODULE_LIST }}
         nice -n $NICE_PRIORITY cmake --build . -- -j $NPROCS

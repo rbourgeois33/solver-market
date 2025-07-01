@@ -10,14 +10,15 @@ env:
 on:
   push:
     branches: [ main ]
-    JOBPATHs:
+    paths:
       - 'external/AMGX/**'
       - '.github/workflows/build-install-AMGX-ada.yml'
   pull_request:
     branches: [ main ]
-    JOBPATHs:
+    paths:
       - 'external/AMGX/**'
       - '.github/workflows/build-install-AMGX-ada.yml'
+  
   workflow_dispatch:  # allows manual triggering
 
 jobs:
@@ -30,19 +31,18 @@ jobs:
     - name: get the AMGX submodule
       run: git submodule update --init --recursive ${{ env.JOBPATH }}
 
-    - name: load modules
-      run: |
-        module purge
-        module load ${{ env.MODULE_LIST }}
-
     - name: reset build and configure
       working-directory: ${{ env.JOBPATH }}
       run: |
+        module purge
+        module load ${{ env.MODULE_LIST }}
         [ -d build ] && rm -rf build
         cmake -B build -S . ${{ env.AMGX_CMAKE_OPTIONS }}
 
     - name: build AMGX 
       working-directory: ${{ env.JOBPATH }}
       run: |
+        module purge
+        module load ${{ env.MODULE_LIST }}
         nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
     

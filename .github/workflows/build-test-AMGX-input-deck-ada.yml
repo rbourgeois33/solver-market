@@ -10,7 +10,7 @@ env:
 on:
   push:
     branches: [ main ]
-    JOBPATHs:
+    paths:
       - '.github/workflows/build-test-AMGX-input-deck-ada.yml'
       - '.github/workflows/build-install-AMGX-ada.yml'
       - 'external/AMGX/**'
@@ -20,7 +20,7 @@ on:
 
   pull_request:
     branches: [ main ]
-    JOBPATHs:
+    paths:
       - '.github/workflows/build-test-AMGX-input-deck-ada.yml'
       - '.github/workflows/build-install-AMGX-ada.yml'
       - 'external/AMGX/**'
@@ -44,20 +44,23 @@ jobs:
     - name: clone and checkout
       uses: actions/checkout@v3
 
-    - name: load modules
-      module load ${{ env.MODULE_LIST }}
-
     - name: configure AMGX input deck
       run: |
+        module purge
+        module load ${{ env.MODULE_LIST }}
         [ -d $JOBPATH ] && rm -rf $JOBPATH
         cmake -B $JOBPATH -S . $CMAKE_OPTIONS
-
-    - name: run AMGX input deck test
-      working-directory: ./$JOBPATH
-      run: |
-        nice -n $NICE_PRIORITY ./input-decks/AMGX_input_deck --matrix=../matrices/aij_51840.mtx --config=../external/AMGX/src/configs/PCG_V.json
 
     - name: build AMGX input deck
       working-directory: ./$JOBPATH
       run: |
+        module purge
+        module load ${{ env.MODULE_LIST }}
         nice -n $NICE_PRIORITY cmake --build . -- -j $NPROCS
+
+    - name: run AMGX input deck test
+      working-directory: ./$JOBPATH
+      run: |
+        module purge
+        module load ${{ env.MODULE_LIST }}
+        nice -n $NICE_PRIORITY ./input-decks/AMGX_input_deck --matrix=../matrices/aij_51840.mtx --config=../external/AMGX/src/configs/PCG_V.json
