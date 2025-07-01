@@ -2,7 +2,7 @@ name: build-install-AMGX-ada
 
 env:
   AMGX_PATH: external/AMGX
-  AMGX_CMAKE_OPTIONS: -D CUDA_ARCH=80 -D CMAKE_BUILD_TYPE=Release
+  AMGX_CMAKE_OPTIONS: -DCUDA_ARCH=80 -DCMAKE_BUILD_TYPE=Release
   NICE_PRIORITY: 19
   NPROCS: 48
   MODULE_LIST: "cuda/12.8.0"  
@@ -40,7 +40,7 @@ jobs:
       working-directory: ${{ env.AMGX_PATH }}
       run: |
         [ -d build ] && rm -rf build
-        cmake -B build -S . -D ${{ env.AMGX_CMAKE_OPTIONS }}
+        cmake -B build -S . ${{ env.AMGX_CMAKE_OPTIONS }}
 
     - name: build AMGX 
       working-directory: ${{ env.AMGX_PATH }}
