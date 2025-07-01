@@ -6,25 +6,17 @@ env:
   NICE_PRIORITY: 19
   NPROCS: 48
   MODULE_LIST: "cuda/12.8.0"  
-  SETUP_ENV: |
-    module purge; \
-    module load ${{ env.MODULE_LIST }}; \
-    export WRAPPER_JOBPATH=${{ github.workspace }}/external/trilinos/install/packages/kokkos/bin/nvcc_wrapper; \
-    export OMPI_CXX=$WRAPPER_JOBPATH; \
-    export CXX=$WRAPPER_JOBPATH; \
-    echo OMPI_CXX=$OMPI_CXX; \
-    echo CXX=$CXX
-  
+
 on:
   push:
     branches: [ main ]
-    JOBPATHs:
+    paths:
       - 'external/trilinos/**'
       - '.github/workflows/build-install-trilinos-ada.yml'
 
   pull_request:
     branches: [ main ]
-    JOBPATHs:
+    paths:
       - 'external/trilinos/**'
       - '.github/workflows/build-install-trilinos-ada.yml'
   workflow_dispatch:  # allows manual triggering
@@ -48,7 +40,13 @@ jobs:
         mkdir build
         [ -d install ] && rm -rf install
         mkdir install
-        ${{ env.SETUP_ENV }}
+        
+        module purge; 
+        module load ${{ env.MODULE_LIST }}; 
+        export WRAPPER_path=${{ github.workspace }}/external/trilinos/install/packages/kokkos/bin/nvcc_wrapper; 
+        export OMPI_CXX=$WRAPPER_path; 
+        export CXX=$WRAPPER_path; 
+
         cmake -B build -S . \
         -D CMAKE_INSTALL_PREFIX=../install \
         -D CMAKE_BUILD_TYPE=RELEASE \
@@ -73,7 +71,12 @@ jobs:
     - name: build and install trilinos
       working-directory: ${{ env.JOBPATH }}
       run: |
-        ${{ env.SETUP_ENV }}
+        module purge; 
+        module load ${{ env.MODULE_LIST }}; 
+        export WRAPPER_path=${{ github.workspace }}/external/trilinos/install/packages/kokkos/bin/nvcc_wrapper; 
+        export OMPI_CXX=$WRAPPER_path; 
+        export CXX=$WRAPPER_path; 
+
         nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
         make install
     
