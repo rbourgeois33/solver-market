@@ -41,16 +41,14 @@ endif()
 # Set CMAKE_PREFIX_PATH and find Trilinos
 set(CMAKE_PREFIX_PATH ${SELECTED_TRILINOS_DIR} ${CMAKE_PREFIX_PATH})
 find_package(Trilinos QUIET)
-
+# Set Common paths for include and lib
+set(Kokkos_INCLUDE_DIR ${SELECTED_TRILINOS_DIR}/include/kokkos)
+set(Trilinos_LIB_DIR ${SELECTED_TRILINOS_DIR}/lib)
 
 # Validate compatibility with build options
 if(IS_KOKKOS_ONLY AND BUILD_MUELU_INPUT_DECK)
   message(FATAL_ERROR "MueLu input deck requested, but only a Kokkos-only install of Trilinos was found. Please build full Trilinos with MueLu enabled.")
 endif()
-
-# Common paths for include and lib
-set(Kokkos_INCLUDE_DIR ${SELECTED_TRILINOS_DIR}/include/kokkos)
-set(Trilinos_LIB_DIR ${SELECTED_TRILINOS_DIR}/lib)
 
 # Summary
 message(STATUS "✅ Trilinos successfully configured from: ${SELECTED_TRILINOS_DIR}")

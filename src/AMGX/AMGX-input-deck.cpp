@@ -5,6 +5,9 @@
 
 #include "solver-market-csr-matrix.hpp"
 #include "solver-market-vector.hpp"
+#include <chrono>
+#include <solver-market-output.h>
+
 
 //AMGX_RC is AMGX Return Code, all AMGX functions output one
 //This function helps decoding it
@@ -46,6 +49,9 @@ int main(int argc, char* argv[])
         std::cerr << "Usage: " << argv[0] << " --matrix=<matrix_file.mtx> --rhs=<rhs_file.mtx> (optional) --config=<config_file.mtx> " << std::endl;
         return EXIT_FAILURE;
     }
+
+    // SolverMarket timers
+    std::chrono::milliseconds SolverMarketSetupTime, SolverMarketSolveTime;
 
     //RC object for error handling
     AMGX_RC rc;
@@ -103,6 +109,7 @@ int main(int argc, char* argv[])
     
     if (rhs_file.empty()){
     std::cout <<"No vector b given, filling with 1"<<std::endl;
+    
     auto vector_b =  SolverMarketVector<double, int>(matrix.get_n(), 1.0);
     AMGX_vector_upload(b, matrix.get_n(), 1, vector_b.get_host_values_pointer());}
     else{
@@ -112,15 +119,25 @@ int main(int argc, char* argv[])
     auto vector_x =  SolverMarketVector<double, int>(matrix.get_n(), 0.0);
     AMGX_vector_upload(x, matrix.get_n(), 1, vector_x.get_host_values_pointer());
 
+    //SolverMarket: time setup
+    auto start = std::chrono::high_resolution_clock::now();
     // 8. Setup the solver (analysis phase)
     rc = AMGX_solver_setup(solver, A);
     check_AMGX_error(rc, "AMGX_solver_setup:");
+    auto end = std::chrono::high_resolution_clock::now();
+    SolverMarketSetupTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
+    //SolverMarket time solve
+    start = std::chrono::high_resolution_clock::now();
     // 9. Solve the system
     rc = AMGX_solver_solve(solver, b, x);
+    end = std::chrono::high_resolution_clock::now();
+    SolverMarketSolveTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-    check_AMGX_error(rc, "AMGX_solver_setup:");
+    check_AMGX_error(rc, "AMGX_solver_solve:");
     //No need to print stuff: AMGX handles it (optional in config/json file)
+
+    SolverMarketOutput(SolverMarketSetupTime, SolverMarketSolveTime, rc==0, argc, argv);
 
     // 10. Clean up and shut down
     AMGX_solver_destroy(solver);

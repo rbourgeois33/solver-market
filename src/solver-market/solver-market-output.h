@@ -12,7 +12,7 @@ void SolverMarketOutput(const std::chrono::milliseconds& SolverMarketSetupTime,
     auto out_solve = std::chrono::duration_cast<std::chrono::duration<double>>(SolverMarketSolveTime);
     auto out_setup = std::chrono::duration_cast<std::chrono::duration<double>>(SolverMarketSetupTime);
 
-    std::cout << "\\---- Solver market output ----//\n";
+    std::cout << "\\---- Solver market output ----/\n";
     std::cout << "input: ";
     for (int i = 0; i < argc; i++) {
         std::cout << argv[i] << " ";
