@@ -45,7 +45,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: load modules
-      run: module load $MODULE_LIST
+      module load ${{ env.MODULE_LIST }}
 
     - name: configure AMGX input deck
       run: |

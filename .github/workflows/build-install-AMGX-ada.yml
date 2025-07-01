@@ -33,7 +33,7 @@ jobs:
     - name: load modules
       run: |
         module purge
-        module load $MODULE_LIST
+        module load ${{ env.MODULE_LIST }}
 
     - name: reset build and configure
       working-directory: ${{ env.JOBPATH }}

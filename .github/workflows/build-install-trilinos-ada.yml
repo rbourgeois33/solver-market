@@ -35,7 +35,7 @@ jobs:
     - name: load modules
       run: |
         module purge
-        module load $MODULE_LIST
+        module load ${{ env.MODULE_LIST }}
         export WRAPPER_JOBPATH="${{ github.workspace }}/${{ env.JOBPATH }}/packages/kokkos/bin/nvcc_wrapper"
         export OMPI_CXX=$WRAPPER_JOBPATH
         export CXX=$WRAPPER_JOBPATH
