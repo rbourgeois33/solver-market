@@ -19,6 +19,7 @@ option(BUILD_UNIT_TESTS "Build unit tests" ON)
 
 # Set the Trilinos install location
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external/trilinos/install ${CMAKE_PREFIX_PATH})
+set(Kokkos_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/include/kokkos)
 
 # Try to find Trilinos
 find_package(Trilinos REQUIRED COMPONENTS Kokkos)
@@ -43,7 +44,7 @@ message(STATUS "Trilinos_INCLUDE_DIRS: ${Trilinos_INCLUDE_DIRS}")
 # ===============================
 # 🔧 Build muelu_input_deck
 # ===============================
-if(BUILD_MUELU_INPUT_DECK AND HAVE_TRILINOS)
+if(BUILD_MUELU_INPUT_DECK)
     add_executable(muelu_input_deck src/muelu/muelu-input-deck.cpp)
 
     # Output binary location
@@ -53,6 +54,7 @@ if(BUILD_MUELU_INPUT_DECK AND HAVE_TRILINOS)
 
     # Include paths
     target_include_directories(muelu_input_deck PRIVATE
+        ${Kokkos_INCLUDE_DIR} 
         ${Trilinos_INCLUDE_DIRS}
         ${Trilinos_TPL_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/src
@@ -89,6 +91,7 @@ if(BUILD_AMGX_INPUT_DECK)
 
     target_include_directories(AMGX_input_deck PRIVATE
         ${CMAKE_SOURCE_DIR}/src/solver-market
+        ${Kokkos_INCLUDE_DIR} 
     )
 
     # Output binary location
@@ -133,6 +136,7 @@ if(BUILD_UNIT_TESTS)
     # Common includes
     target_include_directories(unit-test-solver-market-reader PRIVATE
         ${CMAKE_SOURCE_DIR}/src/solver-market
+        ${Kokkos_INCLUDE_DIR} 
     )
 
     # Link to Trilinos (for kokkos)

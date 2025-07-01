@@ -49,7 +49,6 @@ jobs:
         -D BUILD_SHARED_LIBS:BOOL=ON \
         -D CMAKE_BUILD_TYPE=DEBUG \
         -D Trilinos_ENABLE_Kokkos=ON \
-        -D Trilinos_ENABLE_KokkosCore=ON \
         -D Kokkos_ENABLE_DEBUG=ON \
         -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=ON \
         ..
