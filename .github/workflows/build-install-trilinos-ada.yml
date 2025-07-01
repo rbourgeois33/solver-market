@@ -6,6 +6,14 @@ env:
   NICE_PRIORITY: 19
   NPROCS: 48
   MODULE_LIST: "cuda/12.8.0"  
+  SETUP_ENV: |
+    module purge; \
+    module load ${{ env.MODULE_LIST }}; \
+    export WRAPPER_JOBPATH=${{ github.workspace }}/external/trilinos/install/packages/kokkos/bin/nvcc_wrapper; \
+    export OMPI_CXX=$WRAPPER_JOBPATH; \
+    export CXX=$WRAPPER_JOBPATH; \
+    echo OMPI_CXX=$OMPI_CXX; \
+    echo CXX=$CXX
   
 on:
   push:
@@ -32,28 +40,15 @@ jobs:
     - name: Initialize and update trilinos submodule
       run: git submodule update --init --recursive ${{ env.JOBPATH }}
         
-    - name: load modules
-      run: |
-        module purge
-        module load ${{ env.MODULE_LIST }}
-        export WRAPPER_JOBPATH="${{ github.workspace }}/${{ env.JOBPATH }}/packages/kokkos/bin/nvcc_wrapper"
-        export OMPI_CXX=$WRAPPER_JOBPATH
-        export CXX=$WRAPPER_JOBPATH
-        echo "OMPI_CXX=$OMPI_CXX"
-        echo "CXX=$CXX"
-        module list
-
 
     - name: reset build and configure
       working-directory: ${{ env.JOBPATH }}
       run: |
-        echo "CXX=$CXX"
-        module list
         [ -d build ] && rm -rf build
         mkdir build
         [ -d install ] && rm -rf install
         mkdir install
-        
+        ${{ env.SETUP_ENV }}
         cmake -B build -S . \
         -D CMAKE_INSTALL_PREFIX=../install \
         -D CMAKE_BUILD_TYPE=RELEASE \
@@ -78,6 +73,7 @@ jobs:
     - name: build and install trilinos
       working-directory: ${{ env.JOBPATH }}
       run: |
+        ${{ env.SETUP_ENV }}
         nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
         make install
     
