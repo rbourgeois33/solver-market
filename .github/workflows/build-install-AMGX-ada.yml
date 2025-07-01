@@ -1,7 +1,6 @@
 name: build-install-AMGX-ada
 
 env:
-  RUNNER_LABEL: self-hosted,ada
   AMGX_PATH: external/AMGX
   AMGX_CMAKE_OPTIONS: -D CUDA_ARCH=80 -D CMAKE_BUILD_TYPE=Release
   NICE_PRIORITY: 19
@@ -23,7 +22,7 @@ on:
 
 jobs:
   build-install-AMGX-ada:
-    runs-on: [${{ env.RUNNER_LABEL }}]
+    runs-on: [self-hosted,ada]
     steps:
     - name: clone and checkout
       uses: actions/checkout@v3
