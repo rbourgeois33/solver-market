@@ -81,6 +81,6 @@ jobs:
         module list
         echo $CXX
 
-        nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
+        nice -n ${{ env.NICE_PRIORITY }} make -j${{ env.NPROCS }}
         make install
     

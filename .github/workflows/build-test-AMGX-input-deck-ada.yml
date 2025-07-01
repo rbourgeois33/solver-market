@@ -56,10 +56,10 @@ jobs:
       run: |
         module purge
         module load ${{ env.MODULE_LIST }}
-        nice -n $NICE_PRIORITY cmake --build . -- -j $NPROCS
+        nice -n ${{ env.NICE_PRIORITY }}  make -j${{ env.NPROCS }}
 
     - name: run AMGX input deck test
-      working-directory: ./$JOBPATH
+      working-directory: ${{ env.JOBPATH }
       run: |
         module purge
         module load ${{ env.MODULE_LIST }}

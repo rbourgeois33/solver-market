@@ -44,5 +44,5 @@ jobs:
       run: |
         module purge
         module load ${{ env.MODULE_LIST }}
-        nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
+        nice -n ${{ env.NICE_PRIORITY }}  make -j${{ env.NPROCS }}
     

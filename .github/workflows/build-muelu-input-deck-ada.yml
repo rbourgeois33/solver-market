@@ -33,16 +33,13 @@ on:
       - completed
 
 jobs:
-  prepare-muelu-input-deck:
+  build-muelu-input-deck-ada:
     runs-on: [self-hosted, ada]
     steps:
+    
     - name: clone and checkout
       uses: actions/checkout@v3
 
-  configure-muelu-input-deck:
-    runs-on: [self-hosted, ada]
-    needs: prepare-muelu-input-deck
-    steps:
     - name: configure muelu input deck
       run: |
         module purge
@@ -50,13 +47,9 @@ jobs:
         [ -d $JOBPATH ] && rm -rf $JOBPATH
         cmake -B $JOBPATH -S . $CMAKE_OPTIONS
 
-  build-muelu-input-deck:
-    runs-on: [self-hosted, ada]
-    needs: configure-muelu-input-deck
-    steps:
     - name: build muelu input deck
-      working-directory: ./$JOBPATH
+      working-directory: ${{ env.JOBPATH }
       run: |
         module purge
         module load ${{ env.MODULE_LIST }}
-        nice -n $NICE_PRIORITY cmake --build . -- -j $NPROCS
+        nice -n ${{ env.NICE_PRIORITY }}  make -j${{ env.NPROCS }}
