@@ -16,6 +16,10 @@ option(BUILD_UNIT_TESTS "Build unit tests" ON)
 # ===============================
 # 🔍 Try to Find Trilinos
 # ===============================
+
+# Set the Trilinos install location
+set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external/trilinos/install ${CMAKE_PREFIX_PATH})
+
 # Try to find Trilinos
 find_package(Trilinos REQUIRED)
 
