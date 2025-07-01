@@ -20,6 +20,7 @@ option(BUILD_UNIT_TESTS "Build unit tests" ON)
 # Set the Trilinos install location
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external/trilinos/install ${CMAKE_PREFIX_PATH})
 set(Kokkos_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/include/kokkos)
+set(Trilinos_LIB_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/lib)
 
 # Try to find Trilinos
 find_package(Trilinos REQUIRED COMPONENTS Kokkos)
@@ -40,6 +41,7 @@ message(STATUS "Trilinos version: ${Trilinos_VERSION}")
 message(STATUS "Trilinos packages: ${Trilinos_PACKAGE_LIST}")
 message(STATUS "Trilinos TPLs:     ${Trilinos_TPL_LIST}")
 message(STATUS "Trilinos_INCLUDE_DIRS: ${Trilinos_INCLUDE_DIRS}")
+message(STATUS "Trilinos_LIB_DIR: ${Trilinos_LIB_DIR}")
 
 # ===============================
 # 🔧 Build muelu_input_deck
@@ -99,13 +101,10 @@ if(BUILD_AMGX_INPUT_DECK)
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/input-decks/
     )
 
-    # Link to Trilinos
-    target_include_directories(AMGX_input_deck PRIVATE
-        ${Trilinos_INCLUDE_DIRS}
-    )
     target_link_libraries(AMGX_input_deck
         PRIVATE
         ${Trilinos_LIBRARIES} amgxsh
+        "${Trilinos_LIB_DIR}/libkokkoscore.so"
     )
 
 
@@ -137,15 +136,8 @@ if(BUILD_UNIT_TESTS)
     target_include_directories(unit-test-solver-market-reader PRIVATE
         ${CMAKE_SOURCE_DIR}/src/solver-market
         ${Kokkos_INCLUDE_DIR} 
-    )
-
-    # Link to Trilinos (for kokkos)
-    target_include_directories(unit-test-solver-market-reader PRIVATE
         ${Trilinos_INCLUDE_DIRS}
-    )
-    target_link_libraries(unit-test-solver-market-reader
-        PRIVATE
-        ${Trilinos_LIBRARIES}
+
     )
 
     # Link GTest
@@ -153,6 +145,7 @@ if(BUILD_UNIT_TESTS)
         PRIVATE
         GTest::gtest
         GTest::gtest_main
+        "${Trilinos_LIB_DIR}/libkokkoscore.so"
     )
 endif()
 
