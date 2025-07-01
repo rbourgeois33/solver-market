@@ -19,32 +19,42 @@ option(BUILD_UNIT_TESTS "Build unit tests" ON)
 
 # Trilinos provides both kokkos and solvers that we use in this repo
 # Moreover, Kokkos is at the core of our solver-market routines.
-# herefore, even if we are not using trilinos's solver, we still want kokkos.
-# Set the Trilinos and kokkos install location
-set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external/trilinos/install ${CMAKE_PREFIX_PATH})
-set(Kokkos_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/include/kokkos)
-set(Trilinos_LIB_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install/lib)
+# Therefore, even if we are not using trilinos's solver, we might still want kokkos.
 
-# Try to find Trilinos
-find_package(Trilinos REQUIRED)
+set(TRILINOS_INSTALL_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install)
+set(TRILINOS_KOKKOS_ONLY_INSTALL_DIR ${CMAKE_SOURCE_DIR}/external/trilinos/install-kokkos-only)
 
-# Verify Trilinos was found
-if(NOT Trilinos_FOUND)
-    message(FATAL_ERROR "Trilinos not found! Please build and install Trilinos with Kokkos enabled.")
+# Decide which Trilinos install directory to use
+if(EXISTS "${TRILINOS_INSTALL_DIR}/lib/cmake/Trilinos")
+  set(SELECTED_TRILINOS_DIR ${TRILINOS_INSTALL_DIR})
+  set(IS_KOKKOS_ONLY FALSE)
+  message(STATUS "✅ Found full Trilinos at ${TRILINOS_INSTALL_DIR}")
+elseif(EXISTS "${TRILINOS_KOKKOS_ONLY_INSTALL_DIR}/lib/cmake/Trilinos")
+  message(STATUS "❌ No Trilinos at ${TRILINOS_INSTALL_DIR}")
+  set(SELECTED_TRILINOS_DIR ${TRILINOS_KOKKOS_ONLY_INSTALL_DIR})
+  set(IS_KOKKOS_ONLY TRUE)
+  message(STATUS "✅ Found Kokkos-only Trilinos at ${TRILINOS_KOKKOS_ONLY_INSTALL_DIR}")
+else()
+  message(FATAL_ERROR "❌ No Trilinos installation found in either '${TRILINOS_INSTALL_DIR}' or '${TRILINOS_KOKKOS_ONLY_INSTALL_DIR}'")
 endif()
 
-# Verify Kokkos is available within Trilinos
-if(NOT "Kokkos" IN_LIST Trilinos_PACKAGE_LIST)
-    message(FATAL_ERROR "Trilinos found, but does not include the Kokkos package! Please enable Kokkos in your Trilinos build.")
+# Set CMAKE_PREFIX_PATH and find Trilinos
+set(CMAKE_PREFIX_PATH ${SELECTED_TRILINOS_DIR} ${CMAKE_PREFIX_PATH})
+find_package(Trilinos QUIET)
+
+
+# Validate compatibility with build options
+if(IS_KOKKOS_ONLY AND BUILD_MUELU_INPUT_DECK)
+  message(FATAL_ERROR "MueLu input deck requested, but only a Kokkos-only install of Trilinos was found. Please build full Trilinos with MueLu enabled.")
 endif()
 
-# Debug output
-message(STATUS "✅ Trilinos found")
+# Common paths for include and lib
+set(Kokkos_INCLUDE_DIR ${SELECTED_TRILINOS_DIR}/include/kokkos)
+set(Trilinos_LIB_DIR ${SELECTED_TRILINOS_DIR}/lib)
+
+# Summary
+message(STATUS "✅ Trilinos successfully configured from: ${SELECTED_TRILINOS_DIR}")
 message(STATUS "Trilinos version: ${Trilinos_VERSION}")
-message(STATUS "Trilinos packages: ${Trilinos_PACKAGE_LIST}")
-message(STATUS "Trilinos TPLs:     ${Trilinos_TPL_LIST}")
-message(STATUS "Trilinos_INCLUDE_DIRS: ${Trilinos_INCLUDE_DIRS}")
-message(STATUS "Trilinos_LIB_DIR: ${Trilinos_LIB_DIR}")
 
 # ===============================
 # 🔧 Build muelu_input_deck

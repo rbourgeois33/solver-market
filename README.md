@@ -4,7 +4,7 @@
 
 ada:
 ```bash
-module load cuda/12.4.0
+module load cuda/12.8.0
 export OMPI_CXX=/volatile/catA/rb263871/Trilinos/packages/kokkos/bin/nvcc_wrapper 
 export CXX=/volatile/catA/rb263871/Trilinos/packages/kokkos/bin/nvcc_wrapper 
 ```

@@ -36,10 +36,10 @@ jobs:
     - name: reset build and configure
       working-directory: ${{ env.JOBPATH }}
       run: |
-        [ -d build-kokkos ] && rm -rf build-kokkos
-        mkdir build-kokkos
-        [ -d install-kokkos ] && rm -rf install-kokkos
-        mkdir install-kokkos
+        [ -d build-kokkos-only ] && rm -rf build-kokkos-only
+        mkdir build-kokkos-only
+        [ -d install-kokkos-only ] && rm -rf install-kokkos-only
+        mkdir install-kokkos-only
         
         module purge; 
         module load ${{ env.MODULE_LIST }}; 
@@ -49,18 +49,18 @@ jobs:
         module list
         echo $CXX
 
-        cmake -B build-kokkos -S . \
-        -D CMAKE_INSTALL_PREFIX=../install-kokkos \
+        cmake -B build-kokkos-only -S . \
+        -D CMAKE_INSTALL_PREFIX=install-kokkos-only \
         -D CMAKE_BUILD_TYPE=RELEASE \
         -D BUILD_SHARED_LIBS:BOOL=ON \
-        -D Trilinos_ENABLE_EXPLICIT_INSTANTIATION:BOOL=ON \
         -D Trilinos_ENABLE_Kokkos=ON \
+        -D Kokkos_ENABLE_CUDA=ON \
         -D Kokkos_ENABLE_DEBUG=OFF \
         -D Kokkos_ENABLE_DEBUG_BOUNDS_CHECK=OFF \
         ${{ env.CMAKE_OPTIONS }}
         
     - name: build and install trilinos
-      working-directory: ${{ env.JOBPATH }}/build-kokkos
+      working-directory: ${{ env.JOBPATH }}/build-kokkos-only
       run: |
         module purge; 
         module load ${{ env.MODULE_LIST }}; 
