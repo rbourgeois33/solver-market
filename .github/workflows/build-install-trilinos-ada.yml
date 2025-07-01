@@ -47,7 +47,7 @@ jobs:
     - name: reset build and configure
       working-directory: ${{ env.JOBPATH }}
       run: |
-
+        echo "CXX=$CXX"
         module list
         [ -d build ] && rm -rf build
         mkdir build
