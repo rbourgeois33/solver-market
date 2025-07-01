@@ -1,8 +1,8 @@
 name: build-test-AMGX-input-deck-ada
 
 env:
-  PATH: AMGX-input-deck
-  SOLVER_MARKET_CMAKE_OPTIONS: "-DBUILD_MUELU_INPUT_DECK=OFF -DBUILD_AMGX_INPUT_DECK=ON -DBUILD_UNIT_TESTS=OFF"
+  PATH: build-AMGX-input-deck
+  CMAKE_OPTIONS: "-DBUILD_MUELU_INPUT_DECK=OFF -DBUILD_AMGX_INPUT_DECK=ON -DBUILD_UNIT_TESTS=OFF"
   NICE_PRIORITY: 19
   NPROCS: 48
   MODULE_LIST: "cuda/12.8.0"
@@ -47,18 +47,17 @@ jobs:
     - name: load modules
       run: module load $MODULE_LIST
 
-
     - name: configure AMGX input deck
       run: |
-        [ -d build-$PATH ] && rm -rf build-$PATH
-        cmake -B build-$PATH -S . $SOLVER_MARKET_CMAKE_OPTIONS
+        [ -d $PATH ] && rm -rf $PATH
+        cmake -B $PATH -S . $CMAKE_OPTIONS
 
     - name: run AMGX input deck test
-      working-directory: ./build-$PATH
+      working-directory: ./$PATH
       run: |
         nice -n $NICE_PRIORITY ./input-decks/AMGX_input_deck --matrix=../matrices/aij_51840.mtx --config=../external/AMGX/src/configs/PCG_V.json
 
     - name: build AMGX input deck
-      working-directory: ./build-$PATH
+      working-directory: ./$PATH
       run: |
         nice -n $NICE_PRIORITY cmake --build . -- -j $NPROCS

@@ -1,7 +1,7 @@
 name: build-install-AMGX-ada
 
 env:
-  AMGX_PATH: external/AMGX
+  PATH: external/AMGX
   AMGX_CMAKE_OPTIONS: -DCUDA_ARCH=80 -DCMAKE_BUILD_TYPE=Release
   NICE_PRIORITY: 19
   NPROCS: 48
@@ -28,7 +28,7 @@ jobs:
       uses: actions/checkout@v3
       
     - name: get the AMGX submodule
-      run: git submodule update --init --recursive ${{ env.AMGX_PATH }}
+      run: git submodule update --init --recursive ${{ env.PATH }}
 
     - name: load modules
       run: |
@@ -36,13 +36,13 @@ jobs:
         module load $MODULE_LIST
 
     - name: reset build and configure
-      working-directory: ${{ env.AMGX_PATH }}
+      working-directory: ${{ env.PATH }}
       run: |
         [ -d build ] && rm -rf build
         cmake -B build -S . ${{ env.AMGX_CMAKE_OPTIONS }}
 
     - name: build AMGX 
-      working-directory: ${{ env.AMGX_PATH }}
+      working-directory: ${{ env.PATH }}
       run: |
         nice -n ${{ env.NICE_PRIORITY }} cmake --build build -- -j${{ env.NPROCS }}
     
