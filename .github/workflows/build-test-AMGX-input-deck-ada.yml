@@ -52,7 +52,7 @@ jobs:
         cmake -B $JOBPATH -S . $CMAKE_OPTIONS
 
     - name: build AMGX input deck
-      working-directory: ./$JOBPATH
+      working-directory: ${{ env.JOBPATH }}
       run: |
         module purge
         module load ${{ env.MODULE_LIST }}
