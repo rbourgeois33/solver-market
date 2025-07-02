@@ -56,3 +56,12 @@ jobs:
         module purge
         module load ${{ env.MODULE_LIST }}
         nice -n ${{ env.NICE_PRIORITY }}  make -j${{ env.NPROCS }}
+
+    - name: run muelu input deck test
+      working-directory: ${{ env.JOBPATH }}
+      run: |
+        module purge
+        module load ${{ env.MODULE_LIST }}
+        ./utils/ascii2binary ../matrices/aij_51840.mtx ../matrices/aij_51840.bin
+        nice -n $NICE_PRIORITY ./input-decks/muelu_input_deck --xml=../external/trilinos/packages/muelu/example/basic/set3-mg-chebyshev.xml --matrix=../matrices/aij_51840.bin --binary=1 --timings --stacked-timer --rhs=../matrices/rhs_51840.mtx 
+
