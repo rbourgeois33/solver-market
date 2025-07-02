@@ -66,6 +66,47 @@ TEST(SolverMarketCsrMatrixReader, BasicUnsortedMatrix) {
     EXPECT_FLOAT_EQ(cols(3), 4);
 }
 
+TEST(SolverMarketCsrMatrixReader, BasicUnsortedMatrixWithAComment) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real general\n"
+        "%%Comment\n"
+        "5 5 4\n"
+        "3 2 3.2\n"
+        "1 1 1.0\n"
+        "2 5 2.5\n"
+        "5 5 5.5\n";
+
+    std::string filename = "test1.mtx";
+    write_temp_file(filename, content);
+    auto matrix =  SolverMarketCSRMatrix<float>(filename, SolverMarketCSRMatrixFull);
+
+    auto n = matrix.get_n();
+    auto nnz = matrix.get_nnz();
+    auto offsets = matrix.get_host_offsets();
+    auto cols = matrix.get_host_columns();
+    auto values = matrix.get_host_values();
+
+    ASSERT_EQ(n, 5);
+    ASSERT_EQ(nnz, 4);
+
+    EXPECT_FLOAT_EQ(offsets(0), 0);
+    EXPECT_FLOAT_EQ(offsets(1), 1); 
+    EXPECT_FLOAT_EQ(offsets(2), 2);
+    EXPECT_FLOAT_EQ(offsets(3), 3);
+    EXPECT_FLOAT_EQ(offsets(4), 3);
+    EXPECT_FLOAT_EQ(offsets(5), 4); 
+
+    EXPECT_FLOAT_EQ(values(0), 1.0);
+    EXPECT_FLOAT_EQ(values(1), 2.5);
+    EXPECT_FLOAT_EQ(values(2), 3.2);
+    EXPECT_FLOAT_EQ(values(3), 5.5);
+
+    EXPECT_FLOAT_EQ(cols(0), 0);
+    EXPECT_FLOAT_EQ(cols(1), 4);
+    EXPECT_FLOAT_EQ(cols(2), 1);
+    EXPECT_FLOAT_EQ(cols(3), 4);
+}
+
 TEST(SolverMarketCsrMatrixReader, DenseMatrixNNZGreaterThanN_CheckAll) {
     std::string content =
         "%%MatrixMarket matrix coordinate real general\n"
@@ -450,6 +491,32 @@ TEST(SolverMarketVectorReader, BasicVectorRead) {
     EXPECT_FLOAT_EQ(values(2), 3.0);
     EXPECT_FLOAT_EQ(values(3), 4.0);
 }
+
+TEST(SolverMarketVectorReader, BasicVectorReadWithAComment) {
+    std::string content =
+        "%%MatrixMarket matrix coordinate real general\n"
+        "%% Comment\n"
+        "4 1 4\n"
+        "1 1 1.0\n"
+        "2 1 2.0\n"
+        "3 1 3.0\n"
+        "4 1 4.0\n";
+
+    std::string filename = "vector_valid.mtx";
+    write_temp_file(filename, content);
+
+    SolverMarketVector<float> vec;
+    int result = vec.read_matrix_market_file(filename);
+
+    ASSERT_EQ(result, MtxReaderSuccess);
+    ASSERT_EQ(vec.get_n(), 4);
+    auto values = vec.get_host_values();
+    EXPECT_FLOAT_EQ(values(0), 1.0);
+    EXPECT_FLOAT_EQ(values(1), 2.0);
+    EXPECT_FLOAT_EQ(values(2), 3.0);
+    EXPECT_FLOAT_EQ(values(3), 4.0);
+}
+
 
 TEST(SolverMarketVectorReader, MtxReaderErrorFileNotFound) {
 

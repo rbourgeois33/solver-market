@@ -37,6 +37,7 @@ int SolverMarketVector<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string fil
 
     std::string line;
     bool foundHeader = false;
+    bool justFoundHeader = false;
     bool foundSize = false;
     int declared_nnz = 0;
     int file_line_count = 0;
@@ -46,6 +47,12 @@ int SolverMarketVector<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string fil
 
     while (std::getline(file, line)) {
         if (line.empty()) continue;
+
+        //Skip comment after header iff present
+        if (justFoundHeader && line[0]=='%'){
+            justFoundHeader=false;
+            continue;
+        }
 
         if (!foundHeader) {
             if (line.rfind("%%MatrixMarket", 0) == 0) {
@@ -66,6 +73,7 @@ int SolverMarketVector<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string fil
                 }
 
                 foundHeader = true;
+                justFoundHeader = true;
                 continue;
             }
         }

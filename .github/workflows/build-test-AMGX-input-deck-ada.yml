@@ -63,4 +63,4 @@ jobs:
       run: |
         module purge
         module load ${{ env.MODULE_LIST }}
-        nice -n $NICE_PRIORITY ./input-decks/AMGX_input_deck --matrix=../matrices/aij_51840.mtx --config=../external/AMGX/src/configs/PCG_V.json
+        nice -n $NICE_PRIORITY ./input-decks/AMGX_input_deck --matrix=../matrices/aij_51840.mtx --rhs=../matrices/rhs_51840_coordinate.mtx --config=../external/AMGX/src/configs/PCG_V.json

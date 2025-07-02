@@ -50,6 +50,7 @@ int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string 
     std::string line;
     bool foundSize = false;
     bool foundHeader = false;
+    bool justFoundHeader=false;
     bool found_lower = false, found_upper = false;
     int declared_nnz = 0;
     int file_line_count = 0;
@@ -63,6 +64,13 @@ int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string 
     while (std::getline(file, line)) {
         //Skip header
         if (line.empty()) continue;
+
+        //Skip comment after header iff present
+        if (justFoundHeader && line[0]=='%'){
+            justFoundHeader=false;
+            continue;
+        }
+
 
         // Parse MatrixMarket header
         if (!foundHeader) {
@@ -96,7 +104,7 @@ int SolverMarketCSRMatrix<_TYPE_, _ITYPE_>::read_matrix_market_file(std::string 
                 }
 
                 foundHeader = true;
-
+                justFoundHeader=true;
             }
             continue; // Skip other comment lines before header
         }
