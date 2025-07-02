@@ -4,7 +4,7 @@ env:
   JOBPATH: external/trilinos
   CMAKE_OPTIONS: -D Kokkos_ARCH_ADA89=ON
   NICE_PRIORITY: 19
-  NPROCS: 48 
+  NPROCS: 36 
   MODULE_LIST: "cuda/12.8.0"  
 
 on:
