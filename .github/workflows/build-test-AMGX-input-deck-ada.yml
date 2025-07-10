@@ -58,7 +58,7 @@ jobs:
         module load ${{ env.MODULE_LIST }}
         nice -n ${{ env.NICE_PRIORITY }}  make -j${{ env.NPROCS }}
 
-    - name: run AMGX input deck test
+    - name: test AMGX input deck test
       working-directory: ${{ env.JOBPATH }}
       run: |
         module purge
