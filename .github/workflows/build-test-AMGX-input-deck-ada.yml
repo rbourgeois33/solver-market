@@ -13,9 +13,9 @@ on:
     paths:
       - '.github/workflows/build-test-AMGX-input-deck-ada.yml'
       #- '.github/workflows/build-install-AMGX-ada.yml'
-      #- 'external/AMGX/**'
-      - 'src/AMGX/**'
-      - 'src/solver-market/**'
+      #- 'external/AMGX'
+      - 'src/AMGX'
+      - 'src/solver-market'
       - 'CMakeLists.txt'
 
   pull_request:
@@ -23,9 +23,9 @@ on:
     paths:
       - '.github/workflows/build-test-AMGX-input-deck-ada.yml'
       #- '.github/workflows/build-install-AMGX-ada.yml'
-      #- 'external/AMGX/**'
-      - 'src/AMGX/**'
-      - 'src/solver-market/**'
+      #- 'external/AMGX'
+      - 'src/AMGX'
+      - 'src/solver-market'
       - 'CMakeLists.txt'
 
 

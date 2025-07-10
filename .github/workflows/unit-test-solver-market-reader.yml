@@ -4,14 +4,14 @@ on:
   push:
     branches: [ main ]
     paths:
-     - 'src/solver-market/**'
+     - 'src/solver-market'
      - 'CMakeLists.txt'
      - '.github/workflows/unit-test-solver-market-reader.yml'
 
   pull_request:
     branches: [ main ]
     paths:
-      - 'src/solver-market/**'
+      - 'src/solver-market'
       - 'CMakeLists.txt'
       - '.github/workflows/unit-test-solver-market-reader.yml'
 jobs:

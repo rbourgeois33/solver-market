@@ -11,13 +11,13 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'external/trilinos/**'
+      - 'external/trilinos'
       - '.github/workflows/build-install-trilinos-kokkos-only-ada.yml'
 
   pull_request:
     branches: [ main ]
     paths:
-      - 'external/trilinos/**'
+      - 'external/trilinos'
       - '.github/workflows/build-install-trilinos-kokkos-only-ada.yml'
   workflow_dispatch:  # allows manual triggering
 

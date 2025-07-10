@@ -11,12 +11,12 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'external/AMGX/**'
+      - 'external/AMGX'
       - '.github/workflows/build-install-AMGX-ada.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'external/AMGX/**'
+      - 'external/AMGX'
       - '.github/workflows/build-install-AMGX-ada.yml'
   
   workflow_dispatch:  # allows manual triggering
