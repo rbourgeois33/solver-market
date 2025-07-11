@@ -14,8 +14,8 @@ on:
       - '.github/workflows/build-test-AMGX-input-deck-ada.yml'
       #- '.github/workflows/build-install-AMGX-ada.yml'
       #- 'external/AMGX'
-      - 'src/AMGX'
-      - 'src/solver-market'
+      - 'src/AMGX/**'
+      - 'src/solver-market/**'
       - 'CMakeLists.txt'
 
   pull_request:
@@ -24,8 +24,8 @@ on:
       - '.github/workflows/build-test-AMGX-input-deck-ada.yml'
       #- '.github/workflows/build-install-AMGX-ada.yml'
       #- 'external/AMGX'
-      - 'src/AMGX'
-      - 'src/solver-market'
+      - 'src/AMGX/**'
+      - 'src/solver-market/**'
       - 'CMakeLists.txt'
   
   #This make the workflow callable by another workflow
