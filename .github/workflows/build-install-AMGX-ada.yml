@@ -45,4 +45,7 @@ jobs:
         module purge
         module load ${{ env.MODULE_LIST }}
         nice -n ${{ env.NICE_PRIORITY }}  make -j${{ env.NPROCS }}
-    
+
+  call-build-test-AMGX-input-deck-ada:
+    needs:  build-install-AMGX-ada 
+    uses: ./.github/workflows/build-test-AMGX-input-deck-ada.yml

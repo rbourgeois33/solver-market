@@ -28,13 +28,11 @@ on:
       - 'src/solver-market'
       - 'CMakeLists.txt'
 
+  #Workflow can be called
+  workflow_call:
 
   workflow_dispatch:  # allows manual triggering
 
-  workflow_run: #if the build of AMGX is triggered, this job will be too
-    workflows: ["build-install-AMGX-ada"]
-    types:
-      - completed
 
 jobs:
   build-AMGX-input-deck-ada:
