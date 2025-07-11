@@ -19,6 +19,7 @@ on:
     paths:
       - 'external/trilinos'
       - '.github/workflows/build-install-trilinos-ada.yml'
+      
   workflow_dispatch:  # allows manual triggering
 
 jobs:
@@ -84,3 +85,7 @@ jobs:
         nice -n ${{ env.NICE_PRIORITY }} make -j${{ env.NPROCS }}
         make install
     
+  #Once we build trilinos, we test also the muelu input deck
+  call-build-test-muelu-input-deck-ada:
+    needs:  build-install-trilinos-ada 
+    uses: ./.github/workflows/build-test-muelu-input-deck-ada.yml

@@ -27,8 +27,10 @@ on:
       - 'src/AMGX'
       - 'src/solver-market'
       - 'CMakeLists.txt'
-
-  #Workflow can be called
+  
+  #This make the workflow callable by another workflow
+  #if the build of AMGX is triggered, this job will be too, after
+  #This is why the two elements are commented above
   workflow_call:
 
   workflow_dispatch:  # allows manual triggering

@@ -28,12 +28,10 @@ on:
       - 'CMakeLists.txt'
   workflow_dispatch:
   
+  #This make the workflow callable by another workflow
   #if the build of trilinos is triggered, this job will be too, after
   #This is why the two elements are commented above
-  workflow_run:
-    workflows: ["build-install-trilinos-ada"]
-    types:
-      - completed
+  workflow_call:
 
 jobs:
   build-test-muelu-input-deck-ada:
