@@ -14,7 +14,7 @@ on:
       - '.github/workflows/build-test-muelu-input-deck-ada.yml'
       #- '.github/workflows/build-install-trilinos-ada.yml'
       #- 'external/trilinos'
-      - 'src/muelu'
+      - 'src/muelu/**'
       - 'src/solver-market'
       - 'CMakeLists.txt'
   pull_request:
@@ -23,7 +23,7 @@ on:
       - '.github/workflows/build-test-muelu-input-deck-ada.yml'
       #- '.github/workflows/build-install-trilinos-ada.yml'
       #- 'external/trilinos'
-      - 'src/muelu'
+      - 'src/muelu/**'
       - 'src/solver-market'
       - 'CMakeLists.txt'
   workflow_dispatch:
